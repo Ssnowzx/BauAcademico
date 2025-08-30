@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           (password === "admin" || password === "admin123")
         ) {
           const devUser: User = {
-            id: "dev-admin",
+            id: "00000000-0000-0000-0000-000000000001", // Usar o mesmo ID do admin do banco
             username: "admin",
             is_admin: true,
           };
@@ -120,38 +120,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return false;
       }
 
+      // Definir um ID fixo para o usuário admin
+      let authUserId = userData.id;
+      if (userData.username === 'admin') {
+        authUserId = '00000000-0000-0000-0000-000000000001';
+      }
+
       // Fazer login no Supabase Auth usando o ID do usuário como email
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: `${userData.id}@proofchest.local`,
-        password: userData.id, // Usar o ID como senha temporária
+        email: `${authUserId}@proofchest.local`,
+        password: authUserId, // Usar o ID como senha temporária
       });
 
       if (signInError) {
         // Se o usuário não existe no auth, criar
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: `${userData.id}@proofchest.local`,
-          password: userData.id,
+          email: `${authUserId}@proofchest.local`,
+          password: authUserId,
           options: {
             data: {
-              user_id: userData.id,
+              user_id: authUserId,
             },
           },
         });
 
         if (signUpError) {
           console.error("SignUp error:", signUpError);
-          // Mesmo que falhe o auth, continuar com o login
+          // Continuar mesmo se der erro no auth
         }
       }
 
-      // Definir o contexto de autenticação para o RLS
-      if (authData?.user || signInError?.message?.includes('Email not confirmed')) {
-        // Usuário autenticado com sucesso ou precisa confirmar email
-        console.log("User authenticated:", userData.id);
-      }
+      // Para o usuário admin, usar o ID fixo que criamos no banco
+      const finalUserId = userData.username === 'admin' ? '00000000-0000-0000-0000-000000000001' : userData.id;
 
       setUser({
-        id: userData.id,
+        id: finalUserId,
         username: userData.username,
         is_admin: userData.is_admin,
       });

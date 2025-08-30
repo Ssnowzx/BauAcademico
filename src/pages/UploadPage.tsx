@@ -83,10 +83,12 @@ const UploadPage = () => {
 
       // Adicionar campos extras baseado na categoria
       if (formData.category === 'APC' || formData.category === 'ACE') {
-        if (formData.evento) insertData.evento = formData.evento;
-        if (formData.horas) insertData.horas = parseInt(formData.horas);
+        if (formData.evento.trim()) insertData.evento = formData.evento.trim();
+        if (formData.horas && parseInt(formData.horas) > 0) {
+          insertData.horas = parseInt(formData.horas);
+        }
       } else if (formData.category === 'RECIBO') {
-        if (formData.observacao) insertData.observacao = formData.observacao;
+        if (formData.observacao.trim()) insertData.observacao = formData.observacao.trim();
       }
 
       const { data, error } = await supabase
