@@ -56,6 +56,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           try {
             const devUser = JSON.parse(raw) as User;
             setUser(devUser);
+            
+            // Fazer login automático no Supabase Auth para o usuário dev
+            if (devUser.username === 'admin') {
+              try {
+                await supabase.auth.signInWithPassword({
+                  email: '00000000-0000-0000-0000-000000000001@proofchest.local',
+                  password: '00000000-0000-0000-0000-000000000001',
+                });
+              } catch (e) {
+                console.log("Dev auth signin failed, trying signup:", e);
+                await supabase.auth.signUp({
+                  email: '00000000-0000-0000-0000-000000000001@proofchest.local',
+                  password: '00000000-0000-0000-0000-000000000001',
+                });
+              }
+            }
             return;
           } catch (e) {
             console.warn("Failed to parse dev_user from localStorage", e);
@@ -93,8 +109,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           setUser(devUser);
           try {
             localStorage.setItem("dev_user", JSON.stringify(devUser));
+            
+            // Fazer login no Supabase Auth para que auth.uid() funcione
+            await supabase.auth.signInWithPassword({
+              email: '00000000-0000-0000-0000-000000000001@proofchest.local',
+              password: '00000000-0000-0000-0000-000000000001',
+            }).catch(async () => {
+              // Se não conseguir fazer login, tentar criar o usuário
+              await supabase.auth.signUp({
+                email: '00000000-0000-0000-0000-000000000001@proofchest.local',
+                password: '00000000-0000-0000-0000-000000000001',
+              });
+            });
           } catch (e) {
-            console.warn("Could not persist dev_user", e);
+            console.warn("Could not persist dev_user or auth", e);
           }
           toast.success("Login de desenvolvimento realizado");
           return true;
