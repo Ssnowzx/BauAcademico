@@ -71,6 +71,9 @@ const AdminPage = () => {
       setSubmitting(true);
       let imageUrl = null;
 
+      console.log('Tentando salvar aviso:', { title: formData.title, description: formData.description });
+      console.log('Usuário atual:', user);
+
       // Upload image if provided
       if (formData.image) {
         const fileExt = formData.image.name.split('.').pop();
