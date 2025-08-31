@@ -213,34 +213,48 @@
     box-shadow: 0 6px 24px -8px hsl(var(--primary) / 0.4);
   }
 
-  /* Ensure form controls are legible on white backgrounds (placeholders too) */
-  input,
-  textarea,
-  select,
+  /* Use a targeted utility class for white-field inputs to avoid affecting global buttons */
+  .light-field input,
+  .light-field textarea,
+  .light-field select,
+  .light-field .input,
+  .light-field .form-input,
+  .light-field .form-control,
+  .light-field .file-input,
+  .light-field .select {
+    color: hsl(0 0% 6%) !important; /* near-black for maximum contrast on white/light backgrounds */
+  }
+
+  .light-field input::placeholder,
+  .light-field textarea::placeholder,
+  .light-field select::placeholder {
+    color: rgba(0, 0, 0, 0.45) !important; /* darker placeholder for readability on white */
+  }
+
+  /* Keep default button/text color for buttons (on dark surfaces) */
   button,
-  input[type="text"],
-  input[type="number"],
-  input[type="date"],
-  .input,
-  .form-input,
-  .form-control,
-  .file-input,
-  .select,
-  label {
-    color: hsl(0 0% 6%) !important; /* near-black for maximum contrast */
+  .btn,
+  .btn-cta,
+  .button,
+  .btn-outline,
+  .btn-ghost,
+  .brand-button,
+  .app-header button,
+  .nav .btn {
+    color: hsl(var(--foreground)) !important;
   }
 
-  input::placeholder,
-  textarea::placeholder,
-  select::placeholder {
-    color: rgba(0, 0, 0, 0.45) !important; /* darker placeholder for readability */
-  }
-
-  /* If a control uses a white background, ensure text remains dark */
-  .bg-white input,
-  .bg-white textarea,
-  .bg-white select,
-  .bg-white .input {
+  /* Ensure controls styled with explicit white backgrounds still use dark text */
+  .form-card .input,
+  .form-card input,
+  .form-card textarea {
     color: hsl(0 0% 6%) !important;
+  }
+
+  /* Buttons inside light-field containers should remain white unless explicitly styled */
+  .light-field button,
+  .light-field .btn,
+  .light-field .button {
+    color: inherit !important; /* don't force dark on buttons inside this utility; inherit allows explicit button styles to apply */
   }
 }
