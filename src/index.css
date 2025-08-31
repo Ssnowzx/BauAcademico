@@ -212,6 +212,35 @@
     /* keep the more subtle outer glow for containers */
     box-shadow: 0 6px 24px -8px hsl(var(--primary) / 0.4);
   }
-}
 
-/* ...existing code... */
+  /* Ensure form controls are legible on white backgrounds (placeholders too) */
+  input,
+  textarea,
+  select,
+  button,
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  .input,
+  .form-input,
+  .form-control,
+  .file-input,
+  .select,
+  label {
+    color: hsl(0 0% 6%) !important; /* near-black for maximum contrast */
+  }
+
+  input::placeholder,
+  textarea::placeholder,
+  select::placeholder {
+    color: rgba(0, 0, 0, 0.45) !important; /* darker placeholder for readability */
+  }
+
+  /* If a control uses a white background, ensure text remains dark */
+  .bg-white input,
+  .bg-white textarea,
+  .bg-white select,
+  .bg-white .input {
+    color: hsl(0 0% 6%) !important;
+  }
+}
