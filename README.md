@@ -1,4 +1,4 @@
-# ProofChest
+# BaúAcadêmico
 
 Sistema completo de gestão de comprovantes acadêmicos desenvolvido com React + TypeScript + Supabase.
 
@@ -14,19 +14,22 @@ Sistema completo de gestão de comprovantes acadêmicos desenvolvido com React +
 ## Funcionalidades Implementadas
 
 ### 📁 Gestão de Documentos
+
 - **APC (Atividades Práticas Curriculares)**: Upload com campos extras (Nome do Evento, Horas, Data do Evento)
-- **ACE (Atividades Complementares de Ensino)**: Upload com campos extras (Nome do Evento, Horas, Data do Evento)  
+- **ACE (Atividades Complementares de Ensino)**: Upload com campos extras (Nome do Evento, Horas, Data do Evento)
 - **RECIBOS (Comprovantes de Mensalidade)**: Upload simples de imagem
 - **Visualização** completa com detalhes dos eventos e datas
 - **Exclusão** segura de documentos
 
-### 👤 Sistema de Usuários  
+### 👤 Sistema de Usuários
+
 - Login/SignUp com autenticação Supabase
 - Fallbacks para desenvolvimento local (admin/admin123)
 - Controle de permissões (admin/usuário comum)
 - Sessão persistente e logout seguro
 
 ### 📢 Sistema de Avisos
+
 - Painel administrativo para criar/editar/excluir avisos
 - Upload de imagens para avisos
 - Visualização pública de comunicados
@@ -35,6 +38,7 @@ Sistema completo de gestão de comprovantes acadêmicos desenvolvido com React +
 ## Status do Projeto
 
 ✅ **SISTEMA COMPLETAMENTE FUNCIONAL**
+
 - Todos os recursos implementados e testados
 - Upload de documentos funcionando (APC, ACE, RECIBOS)
 - Campos dinâmicos por categoria implementados
@@ -46,7 +50,7 @@ Sistema completo de gestão de comprovantes acadêmicos desenvolvido com React +
 
 - **Frontend**: React 18 + TypeScript + Vite
 - **UI**: Shadcn/ui + Tailwind CSS + Radix UI
-- **Backend**: Supabase (Auth + Database + Storage)  
+- **Backend**: Supabase (Auth + Database + Storage)
 - **Banco**: PostgreSQL com RLS configurado
 - **Storage**: Supabase Storage para imagens
 - **Deploy**: Preparado para Vercel/Netlify
@@ -59,33 +63,38 @@ Sistema completo de gestão de comprovantes acadêmicos desenvolvido com React +
 ✅ **Resolvido**: Problemas com RLS e políticas do Supabase  
 ✅ **Funcional**: Upload de documentos com campos extras para APC/ACE  
 ✅ **Funcional**: Sistema de avisos com upload de imagens  
-✅ **Funcional**: Autenticação e controle de acesso  
+✅ **Funcional**: Autenticação e controle de acesso
 
 ## Como rodar localmente
 
 ### Pré-requisitos
+
 - Node.js 18+
 - Conta no Supabase
 
 ### Instalação
 
 1. **Clone o repositório**
+
    ```bash
-   git clone https://github.com/seu-usuario/proof-chest.git
+   git clone https://github.com/Ssnowzx/Agenda0103N.git
    cd proof-chest
    ```
 
 2. **Instale as dependências**
+
    ```bash
    npm install
    ```
 
 3. **Configure o banco de dados**
+
    - Acesse seu projeto no Supabase
    - Vá para SQL Editor
    - Execute o script `fix_rls_simple.sql` (isso configura tabelas, políticas e dados iniciais)
 
 4. **Inicie o servidor de desenvolvimento**
+
    ```bash
    npm run dev
    ```
@@ -99,7 +108,7 @@ Sistema completo de gestão de comprovantes acadêmicos desenvolvido com React +
 O arquivo `fix_rls_simple.sql` contém todas as configurações necessárias:
 
 - ✅ Criação das tabelas (users, documents, avisos, hours_log)
-- ✅ Configuração RLS e políticas de segurança  
+- ✅ Configuração RLS e políticas de segurança
 - ✅ Criação dos buckets de storage (documents, avisos)
 - ✅ Usuário admin padrão
 - ✅ Dados de exemplo
@@ -109,12 +118,14 @@ O arquivo `fix_rls_simple.sql` contém todas as configurações necessárias:
 ## Estrutura do Banco
 
 ### Tabela `users`
+
 - `id` (UUID) - Chave primária
 - `username` (TEXT) - Nome de usuário único
 - `password` (TEXT) - Hash da senha (bcrypt)
 - `is_admin` (BOOLEAN) - Flag de administrador
 
 ### Tabela `documents`
+
 - `id` (UUID) - Chave primária
 - `user_id` (UUID) - Referência ao usuário
 - `category` (TEXT) - Categoria: APC, ACE, RECIBO, RECIBOS
@@ -125,6 +136,7 @@ O arquivo `fix_rls_simple.sql` contém todas as configurações necessárias:
 - `data_evento` (DATE) - Data do evento (APC/ACE)
 
 ### Tabela `avisos`
+
 - `id` (UUID) - Chave primária
 - `title` (TEXT) - Título do aviso
 - `description` (TEXT) - Descrição
@@ -152,12 +164,14 @@ npm run lint      # Linting com ESLint
 ## Credenciais de Demonstração
 
 **Usuário Admin:**
+
 - Username: `admin`
 - Password: `admin123`
 
 ## Fallbacks de Desenvolvimento
 
 O sistema inclui fallbacks para desenvolvimento local:
+
 - Persistência em localStorage quando offline
 - Login de desenvolvimento (admin/admin)
 - Upload mock para testes sem conexão
@@ -165,6 +179,7 @@ O sistema inclui fallbacks para desenvolvimento local:
 ## Deployment
 
 1. **Build do projeto**
+
    ```bash
    npm run build
    ```
@@ -187,7 +202,7 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 ---
 
-**ProofChest** - Gerencie seus comprovantes acadêmicos de forma simples e eficiente! 🎓📄
+**BaúAcadêmico** - Gerencie seus comprovantes acadêmicos de forma simples e eficiente! 🎓📄
 
 CREATE POLICY documents_delete_owner_or_admin
 ON public.documents

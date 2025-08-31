@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Settings, Plus, Trash2, Edit, Bell } from 'lucide-react';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { ArrowLeft, Settings, Plus, Trash2, Edit, Bell } from "lucide-react";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface Aviso {
   id: string;
@@ -29,14 +35,14 @@ const AdminPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [editingAviso, setEditingAviso] = useState<Aviso | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    image: null as File | null
+    title: "",
+    description: "",
+    image: null as File | null,
   });
 
   useEffect(() => {
     if (!user?.is_admin) {
-      navigate('/dashboard');
+      navigate("/dashboard");
       return;
     }
     loadAvisos();
@@ -46,15 +52,15 @@ const AdminPage = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('avisos')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("avisos")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setAvisos(data || []);
     } catch (error) {
-      console.error('Error loading avisos:', error);
-      toast.error('Erro ao carregar avisos');
+      console.error("Error loading avisos:", error);
+      toast.error("Erro ao carregar avisos");
     } finally {
       setLoading(false);
     }
@@ -63,7 +69,7 @@ const AdminPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      toast.error('Título é obrigatório');
+      toast.error("Título é obrigatório");
       return;
     }
 
@@ -71,24 +77,27 @@ const AdminPage = () => {
       setSubmitting(true);
       let imageUrl = null;
 
-      console.log('Tentando salvar aviso:', { title: formData.title, description: formData.description });
-      console.log('Usuário atual:', user);
+      console.log("Tentando salvar aviso:", {
+        title: formData.title,
+        description: formData.description,
+      });
+      console.log("Usuário atual:", user);
 
       // Upload image if provided
       if (formData.image) {
-        const fileExt = formData.image.name.split('.').pop();
+        const fileExt = formData.image.name.split(".").pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('avisos')
+          .from("avisos")
           .upload(filePath, formData.image);
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('avisos')
-          .getPublicUrl(filePath);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("avisos").getPublicUrl(filePath);
 
         imageUrl = publicUrl;
       }
@@ -97,41 +106,39 @@ const AdminPage = () => {
         // Update existing aviso
         const updateData: any = {
           title: formData.title,
-          description: formData.description
+          description: formData.description,
         };
-        
+
         if (imageUrl) {
           updateData.image_url = imageUrl;
         }
 
         const { error } = await supabase
-          .from('avisos')
+          .from("avisos")
           .update(updateData)
-          .eq('id', editingAviso.id);
+          .eq("id", editingAviso.id);
 
         if (error) throw error;
-        toast.success('Aviso atualizado com sucesso!');
+        toast.success("Aviso atualizado com sucesso!");
       } else {
         // Create new aviso
-        const { error } = await supabase
-          .from('avisos')
-          .insert({
-            title: formData.title,
-            description: formData.description,
-            image_url: imageUrl
-          });
+        const { error } = await supabase.from("avisos").insert({
+          title: formData.title,
+          description: formData.description,
+          image_url: imageUrl,
+        });
 
         if (error) throw error;
-        toast.success('Aviso criado com sucesso!');
+        toast.success("Aviso criado com sucesso!");
       }
 
       // Reset form
-      setFormData({ title: '', description: '', image: null });
+      setFormData({ title: "", description: "", image: null });
       setEditingAviso(null);
       loadAvisos();
     } catch (error) {
-      console.error('Error saving aviso:', error);
-      toast.error('Erro ao salvar aviso');
+      console.error("Error saving aviso:", error);
+      toast.error("Erro ao salvar aviso");
     } finally {
       setSubmitting(false);
     }
@@ -141,33 +148,33 @@ const AdminPage = () => {
     setEditingAviso(aviso);
     setFormData({
       title: aviso.title,
-      description: aviso.description || '',
-      image: null
+      description: aviso.description || "",
+      image: null,
     });
   };
 
   const handleDelete = async (avisoId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este aviso?')) return;
+    if (!confirm("Tem certeza que deseja excluir este aviso?")) return;
 
     try {
       const { error } = await supabase
-        .from('avisos')
+        .from("avisos")
         .delete()
-        .eq('id', avisoId);
+        .eq("id", avisoId);
 
       if (error) throw error;
-      
-      setAvisos(avisos.filter(aviso => aviso.id !== avisoId));
-      toast.success('Aviso excluído com sucesso');
+
+      setAvisos(avisos.filter((aviso) => aviso.id !== avisoId));
+      toast.success("Aviso excluído com sucesso");
     } catch (error) {
-      console.error('Error deleting aviso:', error);
-      toast.error('Erro ao excluir aviso');
+      console.error("Error deleting aviso:", error);
+      toast.error("Erro ao excluir aviso");
     }
   };
 
   const cancelEdit = () => {
     setEditingAviso(null);
-    setFormData({ title: '', description: '', image: null });
+    setFormData({ title: "", description: "", image: null });
   };
 
   if (!user?.is_admin) {
@@ -182,17 +189,26 @@ const AdminPage = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/dashboard")}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
-          <div className="w-10 h-10 bg-gradient-cosmic rounded-xl flex items-center justify-center">
-            <Settings className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img
+            src="/logoinicio.png"
+            alt="BaúAcadêmico"
+            className="w-10 h-10 object-contain rounded-full ring-1 ring-white/6"
+          />
           <div>
-            <h1 className="text-xl font-bold">Painel Administrativo</h1>
-            <p className="text-sm text-muted-foreground">Gerenciar avisos do sistema</p>
+            <h1
+              className="text-xl font-bold"
+              style={{ color: "hsl(var(--foreground))" }}
+            >
+              Painel Administrativo
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Gerenciar avisos do sistema
+            </p>
           </div>
         </div>
       </div>
@@ -206,13 +222,12 @@ const AdminPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Plus className="w-5 h-5 mr-2" />
-                  {editingAviso ? 'Editar Aviso' : 'Novo Aviso'}
+                  {editingAviso ? "Editar Aviso" : "Novo Aviso"}
                 </CardTitle>
                 <CardDescription>
-                  {editingAviso 
-                    ? 'Atualize as informações do aviso' 
-                    : 'Crie um novo aviso para todos os usuários'
-                  }
+                  {editingAviso
+                    ? "Atualize as informações do aviso"
+                    : "Crie um novo aviso para todos os usuários"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -223,7 +238,12 @@ const AdminPage = () => {
                       id="title"
                       placeholder="Digite o título do aviso"
                       value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
                       disabled={submitting}
                     />
                   </div>
@@ -233,7 +253,12 @@ const AdminPage = () => {
                       id="description"
                       placeholder="Digite a descrição detalhada do aviso"
                       value={formData.description}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
                       disabled={submitting}
                       rows={4}
                     />
@@ -244,7 +269,12 @@ const AdminPage = () => {
                       id="image"
                       type="file"
                       accept="image/*"
-                      onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.files?.[0] || null }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          image: e.target.files?.[0] || null,
+                        }))
+                      }
                       disabled={submitting}
                       className="file:text-primary-foreground file:bg-primary file:border-0 file:rounded-md file:px-3 file:py-1 file:mr-3"
                     />
@@ -261,9 +291,9 @@ const AdminPage = () => {
                           Salvando...
                         </>
                       ) : editingAviso ? (
-                        'Atualizar Aviso'
+                        "Atualizar Aviso"
                       ) : (
-                        'Criar Aviso'
+                        "Criar Aviso"
                       )}
                     </Button>
                     {editingAviso && (
@@ -304,7 +334,9 @@ const AdminPage = () => {
                 ) : avisos.length === 0 ? (
                   <div className="text-center py-8">
                     <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-muted-foreground">Nenhum aviso cadastrado</p>
+                    <p className="text-muted-foreground">
+                      Nenhum aviso cadastrado
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -314,7 +346,9 @@ const AdminPage = () => {
                         className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                       >
                         <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-medium line-clamp-1">{aviso.title}</h4>
+                          <h4 className="font-medium line-clamp-1">
+                            {aviso.title}
+                          </h4>
                           <div className="flex items-center space-x-1 ml-2">
                             <Button
                               variant="ghost"
@@ -349,7 +383,11 @@ const AdminPage = () => {
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(aviso.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                          {format(
+                            new Date(aviso.created_at),
+                            "dd/MM/yyyy 'às' HH:mm",
+                            { locale: ptBR }
+                          )}
                         </p>
                       </div>
                     ))}
