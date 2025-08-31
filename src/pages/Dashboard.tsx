@@ -59,11 +59,18 @@ const Dashboard = () => {
       <div className="border-b bg-card shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-cosmic rounded-xl flex items-center justify-center">
-              <FileText className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <img
+              src="/logoinicio.png"
+              alt="BaúAcadêmico"
+              className="w-10 h-10 object-contain rounded-full ring-1 ring-white/6"
+            />
             <div>
-              <h1 className="text-xl font-bold">ProofChest</h1>
+              <h1
+                className="text-xl font-bold"
+                style={{ color: "hsl(var(--foreground))" }}
+              >
+                BaúAcadêmico
+              </h1>
               <p className="text-sm text-muted-foreground">
                 Bem-vindo, {user?.username}
               </p>

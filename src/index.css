@@ -6,96 +6,68 @@
 
 @layer base {
   :root {
-    /* Cosmic Night Light Theme Colors */
-    --background: 252.73 48.39% 97.30%;
-    --foreground: 282.42 26.61% 30.15%;
-    --card: 0 0% 100%;
-    --card-foreground: 282.42 26.61% 30.15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 282.42 26.61% 30.15%;
-    --primary: 288.03 58.69% 54.17%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 292.69 19.92% 91.74%;
-    --secondary-foreground: 288.17 42.84% 41.43%;
-    --muted: 286.15 6.31% 95.80%;
-    --muted-foreground: 284.74 21.31% 54.26%;
-    --accent: 262.14 17.06% 92.21%;
-    --accent-foreground: 282.42 26.61% 30.15%;
-    --destructive: 14.99 64.71% 68.61%;
+    /* Futuristic Night Palette (BaúAcadêmico) */
+
+    /* Core */
+    --background: 204 5% 4%; /* approx from #0B0C10 */
+    --foreground: 220 8% 92%;
+
+    /* Surfaces */
+    --card: 213 14% 10%; /* dark metal surface */
+    --card-foreground: 220 7% 92%;
+    --popover: 213 14% 10%;
+    --popover-foreground: 220 7% 92%;
+
+    /* Accent colors */
+    --primary: 190 100% 58%; /* #29D6FF */
+    --primary-foreground: 0 0% 10%;
+    --secondary: 204 100% 50%; /* #00A3FF */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 300 100% 52%; /* magenta #E500FF */
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted / text */
+    --muted: 213 15% 16%;
+    --muted-foreground: 220 7% 78%;
+
+    --destructive: 350 80% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 285.96 9.87% 91.15%;
-    --input: 285.96 9.87% 91.15%;
-    --ring: 288.03 58.69% 54.17%;
+
+    /* Metals / structural */
+    --metal-dark: 230 7% 12%; /* #21232B */
+    --metal-light: 215 18% 73%; /* #A8B0C1 */
+
+    --border: 213 12% 14%;
+    --input: 213 12% 14%;
+    --ring: 190 100% 58%;
     --radius: 0.5rem;
 
-    /* Custom gradients and effects */
-    --gradient-cosmic: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --shadow-cosmic: 0 10px 30px -10px hsl(var(--primary) / 0.3);
-    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.2);
-    
-    /* Sidebar */
-    --sidebar-background: 286.15 6.31% 95.80%;
-    --sidebar-foreground: 282.42 26.61% 30.15%;
-    --sidebar-primary: 288.03 58.69% 54.17%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262.14 17.06% 92.21%;
-    --sidebar-accent-foreground: 282.42 26.61% 30.15%;
-    --sidebar-border: 285.96 9.87% 91.15%;
-    --sidebar-ring: 288.03 58.69% 54.17%;
-
-    /* Chart colors */
-    --chart-1: 288.03 58.69% 54.17%;
-    --chart-2: 288.99 54.29% 70.42%;
-    --chart-3: 276.71 67.13% 56.79%;
-    --chart-4: 281.81 63.32% 63.56%;
-    --chart-5: 279.38 56.51% 45.09%;
+    /* Glows & effects */
+    --gradient-cosmic: linear-gradient(
+      90deg,
+      hsl(var(--primary) / 0.12),
+      hsl(var(--accent) / 0.08)
+    );
+    --gradient-subtle: linear-gradient(
+      180deg,
+      hsl(var(--background)),
+      hsl(var(--card))
+    );
+    --shadow-cosmic: 0 10px 30px -10px hsl(var(--primary) / 0.25);
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.18);
   }
 
   .dark {
-    /* Cosmic Night Dark Theme Colors */
-    --background: 283.80 11.01% 17.43%;
-    --foreground: 285.88 11.73% 91.85%;
-    --card: 282.93 16.74% 22.84%;
-    --card-foreground: 285.88 11.73% 91.85%;
-    --popover: 282.93 16.74% 22.84%;
-    --popover-foreground: 285.88 11.73% 91.85%;
-    --primary: 290.40 51.41% 71.62%;
-    --primary-foreground: 283.80 11.01% 17.43%;
-    --secondary: 283.46 31.23% 31.39%;
-    --secondary-foreground: 285.91 33.59% 83.67%;
-    --muted: 281.44 25.79% 27.10%;
-    --muted-foreground: 285.17 21.60% 71.66%;
-    --accent: 280.97 34.79% 33.54%;
-    --accent-foreground: 285.88 11.73% 91.85%;
-    --destructive: 14.99 64.71% 68.61%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 282.58 24.72% 32.61%;
-    --input: 282.58 24.72% 32.61%;
-    --ring: 290.40 51.41% 71.62%;
-
-    /* Custom gradients and effects for dark mode */
-    --gradient-cosmic: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --shadow-cosmic: 0 10px 30px -10px hsl(var(--primary) / 0.4);
-    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.3);
-
-    /* Sidebar dark */
-    --sidebar-background: 282.93 16.74% 22.84%;
-    --sidebar-foreground: 285.88 11.73% 91.85%;
-    --sidebar-primary: 290.40 51.41% 71.62%;
-    --sidebar-primary-foreground: 283.80 11.01% 17.43%;
-    --sidebar-accent: 280.97 34.79% 33.54%;
-    --sidebar-accent-foreground: 285.88 11.73% 91.85%;
-    --sidebar-border: 282.58 24.72% 32.61%;
-    --sidebar-ring: 290.40 51.41% 71.62%;
-
-    /* Chart colors dark */
-    --chart-1: 290.40 51.41% 71.62%;
-    --chart-2: 274.91 42.29% 63.82%;
-    --chart-3: 244.75 52.88% 74.82%;
-    --chart-4: 186.68 41.15% 71.24%;
-    --chart-5: 346.81 59.36% 75.46%;
+    /* Explicit dark-mode overrides (same palette tuned) */
+    --background: 204 5% 4%;
+    --foreground: 220 8% 92%;
+    --card: 213 14% 10%;
+    --card-foreground: 220 7% 92%;
+    --primary: 190 100% 58%;
+    --accent: 300 100% 52%;
+    --muted: 213 15% 16%;
+    --border: 213 12% 14%;
+    --ring: 190 100% 58%;
   }
 }
 
@@ -106,5 +78,140 @@
 
   body {
     @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Brand utilities */
+  .app-header {
+    background: var(--gradient-cosmic);
+    border-bottom: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-glow);
+    backdrop-filter: blur(6px);
+  }
+
+  .brand-logo {
+    width: 44px;
+    height: 44px;
+    background-image: url("/logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: inline-block;
+  }
+
+  /* Large image logo without background box */
+  .brand-image {
+    display: block;
+    width: 180px;
+    height: auto;
+    max-width: 70%;
+    object-fit: contain;
+    filter: none;
+    -webkit-filter: none;
+  }
+
+  /* Smaller variant for forms */
+  .brand-image-sm {
+    display: block;
+    width: 88px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Primary CTA button style for high contrast on dark background */
+  .btn-cta {
+    background: linear-gradient(90deg, #29d6ff 0%, #e500ff 100%);
+    color: white !important;
+    box-shadow: 0 8px 30px -12px rgba(41, 214, 255, 0.32),
+      0 2px 12px rgba(229, 0, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  /* Hero / index specific */
+  .hero-container {
+    position: relative;
+    display: flex;
+    align-items: center; /* center vertically */
+    justify-content: center;
+    flex-direction: column;
+    gap: 28px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  .hero-title-back {
+    font-size: 88px;
+    line-height: 0.9;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: rgba(
+      107,
+      91,
+      149,
+      0.16
+    ); /* slightly more visible but still subtle */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -46%);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    text-transform: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 20; /* ensure content sits above background title */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 18px;
+    text-align: center;
+    max-width: 720px;
+    padding: 48px 20px;
+  }
+
+  .hero-tagline {
+    font-size: 20px;
+    color: hsl(var(--muted-foreground));
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  .cta-pill {
+    border-radius: 9999px;
+    padding: 14px 36px;
+    font-weight: 600;
+    font-size: 18px;
+    display: inline-block;
+  }
+
+  @media (max-width: 640px) {
+    .hero-title-back {
+      font-size: 40px;
+      top: 45%;
+      transform: translate(-50%, -50%);
+    }
+
+    .brand-image {
+      width: 150px;
+    }
+
+    .hero-tagline {
+      font-size: 16px;
+    }
+  }
+
+  .glow-accent {
+    /* keep the more subtle outer glow for containers */
+    box-shadow: 0 6px 24px -8px hsl(var(--primary) / 0.4);
   }
 }
+
+/* ...existing code... */

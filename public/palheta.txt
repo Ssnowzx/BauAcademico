@@ -1,0 +1,14 @@
+// Fundo e Sombra
+#0B0C10
+
+// Azuis / Ciano
+#29D6FF
+#00A3FF
+
+// Magentas / Rosas
+#E500FF
+#B500D1
+
+// Metais / Estrutura
+#21232B
+#A8B0C1`

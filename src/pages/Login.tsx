@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileText, GraduationCap } from "lucide-react";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -55,15 +54,19 @@ const Login = () => {
       <div className="w-full max-w-md space-y-8">
         {/* Logo/Brand */}
         <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-gradient-cosmic rounded-2xl flex items-center justify-center shadow-cosmic">
-            <div className="relative">
-              <FileText className="w-8 h-8 text-primary-foreground" />
-              <GraduationCap className="w-4 h-4 text-primary-foreground absolute -top-1 -right-1" />
-            </div>
+          <div className="mx-auto flex items-center justify-center">
+            <img
+              src="/logo.png"
+              alt="BaúAcadêmico"
+              className="brand-image-sm"
+            />
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-cosmic bg-clip-text text-transparent">
-              ProofChest
+            <h1
+              className="text-3xl font-bold"
+              style={{ color: "hsl(var(--foreground))" }}
+            >
+              BaúAcadêmico
             </h1>
             <p className="text-muted-foreground">
               Gerencie seus comprovantes acadêmicos
@@ -72,7 +75,7 @@ const Login = () => {
         </div>
 
         {/* Login / SignUp Form */}
-        <Card className="shadow-lg border-0 shadow-cosmic/20">
+        <Card className="shadow-lg border-0 shadow-cosmic/20 bg-card">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">
               {isSignUp ? "Criar Conta" : "Entrar"}
@@ -127,7 +130,7 @@ const Login = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-cosmic hover:shadow-glow transition-all duration-200"
+                className="w-full bg-gradient-cosmic hover:shadow-glow transition-all duration-200 text-white"
                 disabled={
                   isLoading ||
                   !username ||
