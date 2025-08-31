@@ -1,102 +1,193 @@
-# Proof Chest
+# ProofChest
 
-Resumo curto
+Sistema completo de gestão de comprovantes acadêmicos desenvolvido com React + TypeScript + Supabase.
 
-- App React + Supabase para upload/gestão de documentos.
-- Removidas menções ao Lovable e adicionados fallbacks DEV para login/upload.
+## Resumo
 
-Status atual (onde paramos)
+- **Sistema funcionando completamente** - todos os recursos implementados e testados
+- Upload e gestão de documentos acadêmicos com categorização inteligente
+- Formulários dinâmicos com campos específicos por categoria
+- Sistema de autenticação robusto com fallbacks para desenvolvimento
+- Painel administrativo completo para gestão de avisos
+- Interface moderna e responsiva
 
-- Issue bloqueadora: signUp cria conta no Auth, mas INSERT na tabela `users` falha com erro RLS: `42501 new row violates row-level security policy for table "users"` e às vezes 401 no endpoint REST.
-- Causa provável: INSERT está a ser feita sem sessão válida ou as policies RLS não permitem inserir (a tabela `users.id` é do tipo UUID; policies devem usar `auth.uid()::uuid`).
-- Código relevante: `src/contexts/AuthContext.tsx` (função `signUp`) — já implementa tentativas para obter `authUserId` (getSession / signInWithPassword / onAuthStateChange wait), mas o INSERT continua a ser bloqueado enquanto não existir sessão ou se policy estiver incorreta.
+## Funcionalidades Implementadas
 
-Como rodar localmente
+### 📁 Gestão de Documentos
+- **APC (Atividades Práticas Curriculares)**: Upload com campos extras (Nome do Evento, Horas, Data do Evento)
+- **ACE (Atividades Complementares de Ensino)**: Upload com campos extras (Nome do Evento, Horas, Data do Evento)  
+- **RECIBOS (Comprovantes de Mensalidade)**: Upload simples de imagem
+- **Visualização** completa com detalhes dos eventos e datas
+- **Exclusão** segura de documentos
 
-1. Instalar e rodar:
-   - npm install
-   - npm run dev
-2. Frontend usa a key anon/public do Supabase (ver `src/integrations/supabase/client.ts`).
-3. Em modo DEV existem fallbacks:
-   - login: admin/admin e admin/admin123 criam `dev_user` em localStorage (mantém permissões locais)
-   - signUp/upload em DEV podem gravar em localStorage
+### 👤 Sistema de Usuários  
+- Login/SignUp com autenticação Supabase
+- Fallbacks para desenvolvimento local (admin/admin123)
+- Controle de permissões (admin/usuário comum)
+- Sessão persistente e logout seguro
 
-SQL a aplicar no Supabase (IMPORTANTE: sua coluna `users.id` é UUID)
-Cole e execute no SQL editor do Supabase — estas policies habilitam RLS e permitem que o usuário autenticado insira a própria linha (id = auth.uid()::uuid):
+### 📢 Sistema de Avisos
+- Painel administrativo para criar/editar/excluir avisos
+- Upload de imagens para avisos
+- Visualização pública de comunicados
+- Interface responsiva para gestão
 
--- Habilitar RLS na tabela users
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+## Status do Projeto
 
--- INSERT: apenas quando id = auth.uid()::uuid
-CREATE POLICY users_insert_own
-ON public.users
-FOR INSERT
-TO authenticated
-WITH CHECK (auth.uid()::uuid = id);
+✅ **SISTEMA COMPLETAMENTE FUNCIONAL**
+- Todos os recursos implementados e testados
+- Upload de documentos funcionando (APC, ACE, RECIBOS)
+- Campos dinâmicos por categoria implementados
+- Sistema de avisos com imagens funcionando
+- Autenticação e permissões funcionais
+- Interface responsiva e moderna
 
--- SELECT: dono ou admin
-CREATE POLICY users_select_own_or_admin
-ON public.users
-FOR SELECT
-TO authenticated
-USING (
-auth.uid()::uuid = id
-OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid()::uuid AND u.is_admin = TRUE)
-);
+## Stack Tecnológica
 
--- UPDATE: dono ou admin
-CREATE POLICY users_update_own_or_admin
-ON public.users
-FOR UPDATE
-TO authenticated
-USING (
-auth.uid()::uuid = id
-OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid()::uuid AND u.is_admin = TRUE)
-)
-WITH CHECK (
-auth.uid()::uuid = id
-OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid()::uuid AND u.is_admin = TRUE)
-);
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI**: Shadcn/ui + Tailwind CSS + Radix UI
+- **Backend**: Supabase (Auth + Database + Storage)  
+- **Banco**: PostgreSQL com RLS configurado
+- **Storage**: Supabase Storage para imagens
+- **Deploy**: Preparado para Vercel/Netlify
+- Row Level Security (RLS) configurado
+- Políticas de acesso por usuário
+- Storage seguro para documentos e imagens
 
--- DELETE: admin apenas
-CREATE POLICY users_delete_admin_only
-ON public.users
-FOR DELETE
-TO authenticated
-USING (
-EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid()::uuid AND u.is_admin = TRUE)
-);
+## Status Atual
 
-Políticas para `documents` (assumindo owner UUID)
-ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
+✅ **Resolvido**: Problemas com RLS e políticas do Supabase  
+✅ **Funcional**: Upload de documentos com campos extras para APC/ACE  
+✅ **Funcional**: Sistema de avisos com upload de imagens  
+✅ **Funcional**: Autenticação e controle de acesso  
 
-CREATE POLICY documents_insert_owner
-ON public.documents
-FOR INSERT
-TO authenticated
-WITH CHECK (owner = auth.uid()::uuid);
+## Como rodar localmente
 
-CREATE POLICY documents_select_owner_or_admin
-ON public.documents
-FOR SELECT
-TO authenticated
-USING (
-owner = auth.uid()::uuid
-OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid()::uuid AND u.is_admin = TRUE)
-);
+### Pré-requisitos
+- Node.js 18+
+- Conta no Supabase
 
-CREATE POLICY documents_update_owner_or_admin
-ON public.documents
-FOR UPDATE
-TO authenticated
-USING (
-owner = auth.uid()::uuid
-OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid()::uuid AND u.is_admin = TRUE)
-)
-WITH CHECK (
-owner = auth.uid()::uuid
-OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid()::uuid AND u.is_admin = TRUE)
-);
+### Instalação
+
+1. **Clone o repositório**
+   ```bash
+   git clone https://github.com/seu-usuario/proof-chest.git
+   cd proof-chest
+   ```
+
+2. **Instale as dependências**
+   ```bash
+   npm install
+   ```
+
+3. **Configure o banco de dados**
+   - Acesse seu projeto no Supabase
+   - Vá para SQL Editor
+   - Execute o script `fix_rls_simple.sql` (isso configura tabelas, políticas e dados iniciais)
+
+4. **Inicie o servidor de desenvolvimento**
+   ```bash
+   npm run dev
+   ```
+
+5. **Acesse a aplicação**
+   - Abra http://localhost:5173
+   - Use as credenciais: **admin** / **admin123**
+
+## Configuração do Supabase
+
+O arquivo `fix_rls_simple.sql` contém todas as configurações necessárias:
+
+- ✅ Criação das tabelas (users, documents, avisos, hours_log)
+- ✅ Configuração RLS e políticas de segurança  
+- ✅ Criação dos buckets de storage (documents, avisos)
+- ✅ Usuário admin padrão
+- ✅ Dados de exemplo
+
+**Execute este script no Supabase SQL Editor para configurar tudo automaticamente.**
+
+## Estrutura do Banco
+
+### Tabela `users`
+- `id` (UUID) - Chave primária
+- `username` (TEXT) - Nome de usuário único
+- `password` (TEXT) - Hash da senha (bcrypt)
+- `is_admin` (BOOLEAN) - Flag de administrador
+
+### Tabela `documents`
+- `id` (UUID) - Chave primária
+- `user_id` (UUID) - Referência ao usuário
+- `category` (TEXT) - Categoria: APC, ACE, RECIBO, RECIBOS
+- `image_url` (TEXT) - URL da imagem no storage
+- `extracted_text` (TEXT) - Texto extraído (OCR futuro)
+- `evento` (TEXT) - Nome do evento (APC/ACE)
+- `horas` (INTEGER) - Quantidade de horas (APC/ACE)
+- `data_evento` (DATE) - Data do evento (APC/ACE)
+
+### Tabela `avisos`
+- `id` (UUID) - Chave primária
+- `title` (TEXT) - Título do aviso
+- `description` (TEXT) - Descrição
+- `image_url` (TEXT) - URL da imagem (opcional)
+
+## Tecnologias Utilizadas
+
+- **Frontend**: React 18, TypeScript, Vite
+- **UI**: shadcn/ui, Tailwind CSS, Radix UI
+- **Backend**: Supabase (Auth + Database + Storage)
+- **Autenticação**: Supabase Auth + bcrypt
+- **Formulários**: React Hook Form + Zod
+- **Notificações**: Sonner
+- **Ícones**: Lucide React
+
+## Scripts Disponíveis
+
+```bash
+npm run dev       # Servidor de desenvolvimento
+npm run build     # Build para produção
+npm run preview   # Preview da build
+npm run lint      # Linting com ESLint
+```
+
+## Credenciais de Demonstração
+
+**Usuário Admin:**
+- Username: `admin`
+- Password: `admin123`
+
+## Fallbacks de Desenvolvimento
+
+O sistema inclui fallbacks para desenvolvimento local:
+- Persistência em localStorage quando offline
+- Login de desenvolvimento (admin/admin)
+- Upload mock para testes sem conexão
+
+## Deployment
+
+1. **Build do projeto**
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy no Vercel/Netlify**
+   - Configure as variáveis de ambiente do Supabase
+   - Faça deploy da pasta `dist/`
+
+## Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+
+---
+
+**ProofChest** - Gerencie seus comprovantes acadêmicos de forma simples e eficiente! 🎓📄
 
 CREATE POLICY documents_delete_owner_or_admin
 ON public.documents
