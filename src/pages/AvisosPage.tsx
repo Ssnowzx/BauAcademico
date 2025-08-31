@@ -115,11 +115,15 @@ const AvisosPage = () => {
                 <CardContent className="space-y-4">
                   {aviso.image_url && (
                     <div>
-                      <img
-                        src={aviso.image_url}
-                        alt={aviso.title}
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
+                      <a href={aviso.image_url} target="_blank" rel="noopener noreferrer" className="block">
+                        <div className="flex items-center justify-center overflow-hidden rounded-lg bg-black/5">
+                          <img
+                            src={aviso.image_url}
+                            alt={aviso.title}
+                            className="w-full object-contain max-h-[60vh] rounded-lg"
+                          />
+                        </div>
+                      </a>
                     </div>
                   )}
                   {aviso.description && (
