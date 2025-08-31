@@ -31,7 +31,7 @@ interface Document {
   extracted_text: string;
   evento?: string;
   horas?: number;
-  observacao?: string;
+  data_evento?: string;
   created_at: string;
 }
 
@@ -48,6 +48,11 @@ const DocumentsPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [uploading, setUploading] = useState(false);
+
+  // Form fields for APC/ACE
+  const [evento, setEvento] = useState("");
+  const [horas, setHoras] = useState<number | "">("");
+  const [dataEvento, setDataEvento] = useState("");
 
   const categoryConfig = {
     apc: {
@@ -117,6 +122,9 @@ const DocumentsPage = () => {
             category: d.category,
             image_url: d.dataUrl || d.image_url,
             extracted_text: d.extracted_text,
+            evento: d.evento,
+            horas: d.horas,
+            data_evento: d.data_evento,
             created_at: d.created_at,
           }));
         setDocuments(filtered.reverse());
@@ -226,6 +234,9 @@ const DocumentsPage = () => {
           dataUrl,
           category: categoryKey,
           extracted_text: "",
+          evento: evento || undefined,
+          horas: horas ? Number(horas) : undefined,
+          data_evento: dataEvento || undefined,
           created_at: new Date().toISOString(),
         };
         devDocs.push(doc);
@@ -237,6 +248,9 @@ const DocumentsPage = () => {
             category: doc.category,
             image_url: doc.dataUrl,
             extracted_text: doc.extracted_text,
+            evento: doc.evento,
+            horas: doc.horas,
+            data_evento: doc.data_evento,
             created_at: doc.created_at,
           },
           ...documents,
@@ -259,14 +273,23 @@ const DocumentsPage = () => {
       }
 
       // Insert DB record
+      const insertData: any = {
+        user_id: user.id,
+        category: category?.toUpperCase(),
+        image_url: fileName,
+        extracted_text: "",
+      };
+
+      // Adicionar campos extras para APC e ACE
+      if (category === "apc" || category === "ace") {
+        if (evento) insertData.evento = evento;
+        if (horas) insertData.horas = Number(horas);
+        if (dataEvento) insertData.data_evento = dataEvento;
+      }
+
       const { data: dbData, error: dbError } = await supabase
         .from("documents")
-        .insert({
-          user_id: user.id,
-          category: category?.toUpperCase(),
-          image_url: fileName,
-          extracted_text: "",
-        });
+        .insert(insertData);
 
       if (dbError) {
         console.error("DB insert error:", dbError);
@@ -282,6 +305,9 @@ const DocumentsPage = () => {
         category: category ?? "",
         image_url: fileName,
         extracted_text: "",
+        evento: evento || undefined,
+        horas: horas ? Number(horas) : undefined,
+        data_evento: dataEvento || undefined,
         created_at: inserted?.created_at ?? new Date().toISOString(),
       };
 
@@ -290,6 +316,10 @@ const DocumentsPage = () => {
       setUploadOpen(false);
       setSelectedFile(null);
       setPreview("");
+      // Limpar campos do formulário
+      setEvento("");
+      setHoras("");
+      setDataEvento("");
     } catch (error: any) {
       console.error("Upload error:", error);
       const msg = String(error?.message || error?.statusText || error);
@@ -433,24 +463,22 @@ const DocumentsPage = () => {
                   </div>
 
                   {/* Extra Fields Preview */}
-                  {(doc.evento || doc.horas || doc.observacao) && (
+                  {(doc.evento || doc.horas) && (
                     <div className="bg-muted/50 p-3 rounded-md space-y-2">
                       {doc.evento && (
                         <div>
                           <span className="text-xs font-medium">Evento:</span>
-                          <p className="text-xs text-muted-foreground">{doc.evento}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {doc.evento}
+                          </p>
                         </div>
                       )}
                       {doc.horas && (
                         <div>
                           <span className="text-xs font-medium">Horas:</span>
-                          <p className="text-xs text-muted-foreground">{doc.horas}h</p>
-                        </div>
-                      )}
-                      {doc.observacao && (
-                        <div>
-                          <span className="text-xs font-medium">Observação:</span>
-                          <p className="text-xs text-muted-foreground line-clamp-2">{doc.observacao}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {doc.horas}h
+                          </p>
                         </div>
                       )}
                     </div>
@@ -499,6 +527,9 @@ const DocumentsPage = () => {
                   setUploadOpen(false);
                   setSelectedFile(null);
                   setPreview("");
+                  setEvento("");
+                  setHoras("");
+                  setDataEvento("");
                 }}
               >
                 ✕
@@ -527,6 +558,53 @@ const DocumentsPage = () => {
                 )}
               </div>
 
+              {/* Campos adicionais para APC e ACE */}
+              {(category === "apc" || category === "ace") && (
+                <>
+                  <div>
+                    <label className="text-sm font-medium">
+                      Nome do Evento
+                    </label>
+                    <input
+                      type="text"
+                      value={evento}
+                      onChange={(e) => setEvento(e.target.value)}
+                      placeholder="Ex: Workshop de React"
+                      className="mt-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">
+                      Quantidade de Horas
+                    </label>
+                    <input
+                      type="number"
+                      value={horas}
+                      onChange={(e) =>
+                        setHoras(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                      placeholder="Ex: 8"
+                      className="mt-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">
+                      Data do Evento
+                    </label>
+                    <input
+                      type="date"
+                      value={dataEvento}
+                      onChange={(e) => setDataEvento(e.target.value)}
+                      className="mt-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="flex items-center gap-2">
                 <Button
                   onClick={uploadDocument}
@@ -550,6 +628,9 @@ const DocumentsPage = () => {
                     setUploadOpen(false);
                     setSelectedFile(null);
                     setPreview("");
+                    setEvento("");
+                    setHoras("");
+                    setDataEvento("");
                   }}
                 >
                   Cancelar
@@ -589,34 +670,34 @@ const DocumentsPage = () => {
                 alt="Document"
                 className="w-full rounded-lg shadow-lg"
               />
-              
+
               {/* Extra Fields */}
-              {(selectedDoc.evento || selectedDoc.horas || selectedDoc.observacao) && (
+              {(selectedDoc.evento || selectedDoc.horas) && (
                 <div>
-                  <h3 className="font-semibold mb-3">Informações Adicionais:</h3>
+                  <h3 className="font-semibold mb-3">
+                    Informações Adicionais:
+                  </h3>
                   <div className="bg-muted p-4 rounded-lg space-y-3">
                     {selectedDoc.evento && (
                       <div>
                         <span className="font-medium">Evento:</span>
-                        <p className="text-muted-foreground">{selectedDoc.evento}</p>
+                        <p className="text-muted-foreground">
+                          {selectedDoc.evento}
+                        </p>
                       </div>
                     )}
                     {selectedDoc.horas && (
                       <div>
                         <span className="font-medium">Horas:</span>
-                        <p className="text-muted-foreground">{selectedDoc.horas} horas</p>
-                      </div>
-                    )}
-                    {selectedDoc.observacao && (
-                      <div>
-                        <span className="font-medium">Observação:</span>
-                        <p className="text-muted-foreground whitespace-pre-wrap">{selectedDoc.observacao}</p>
+                        <p className="text-muted-foreground">
+                          {selectedDoc.horas} horas
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
               )}
-              
+
               {selectedDoc.extracted_text && (
                 <div>
                   <h3 className="font-semibold mb-3">Texto Extraído:</h3>
