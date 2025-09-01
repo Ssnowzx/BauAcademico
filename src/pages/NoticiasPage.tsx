@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,43 +10,53 @@ import {
 } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Bell, Calendar, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, Newspaper, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 
-interface Aviso {
+interface Noticia {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   image_url: string | null;
   created_at: string;
 }
 
-const AvisosPage = () => {
+const NoticiasPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [loading, setLoading] = useState(true);
+  const [missingTable, setMissingTable] = useState(false);
 
   useEffect(() => {
-    loadAvisos();
+    loadNoticias();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadAvisos = async () => {
+  const loadNoticias = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("avisos")
+        .from("noticias")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setAvisos(data || []);
-    } catch (error) {
-      console.error("Error loading avisos:", error);
-      toast.error("Erro ao carregar avisos");
+      setNoticias(data || []);
+    } catch (err: any) {
+      console.error("Error loading noticias:", err);
+      // Supabase returns PGRST205 when the table is not present in the schema cache
+      if (err?.code === "PGRST205") {
+        setMissingTable(true);
+        toast.error(
+          "Tabela 'noticias' não encontrada no banco. Rode a migração."
+        );
+      } else {
+        toast.error("Erro ao carregar notícias");
+      }
     } finally {
       setLoading(false);
     }
@@ -54,6 +64,19 @@ const AvisosPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
+      {missingTable && (
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <div className="p-4 rounded-md bg-destructive/6 border border-destructive/10 text-destructive">
+            <strong>Tabela 'noticias' não encontrada.</strong>
+            <div className="text-sm">
+              Abra o painel do Supabase e execute a migração SQL para criar a
+              tabela <code>public.noticias</code>. Ver README ou contate o
+              administrador.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="border-b bg-card shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 sm:py-4">
@@ -69,15 +92,15 @@ const AvisosPage = () => {
                 <ArrowLeft className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Voltar</span>
               </Button>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-cyan-500 to-fuchsia-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-                  Avisos
+                  Notícias
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                  Comunicados e notícias importantes
+                  Últimas notícias do BaúAcadêmico
                 </p>
               </div>
             </div>
@@ -86,7 +109,7 @@ const AvisosPage = () => {
             <div className="flex items-center space-x-2 flex-shrink-0">
               {user?.is_admin && (
                 <Button
-                  onClick={() => navigate("/admin")}
+                  onClick={() => navigate("/admin/noticias")}
                   className="bg-gradient-cosmic hover:shadow-glow transition-all duration-200 text-xs sm:text-sm px-2 sm:px-4"
                 >
                   <Plus className="w-4 h-4 sm:mr-2" />
@@ -104,63 +127,60 @@ const AvisosPage = () => {
           <div className="flex items-center justify-center py-12">
             <LoadingSpinner size="lg" />
           </div>
-        ) : avisos.length === 0 ? (
+        ) : noticias.length === 0 ? (
           <div className="text-center py-12">
-            <Bell className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <Newspaper className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">
-              Nenhum aviso encontrado
+              Nenhuma notícia encontrada
             </h3>
             <p className="text-muted-foreground">
-              Não há avisos disponíveis no momento
+              Não há notícias disponíveis no momento
             </p>
           </div>
         ) : (
           <div className="space-y-6">
-            {avisos.map((aviso) => (
+            {noticias.map((n) => (
               <Card
-                key={aviso.id}
+                key={n.id}
                 className="hover:shadow-cosmic transition-all duration-300"
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <CardTitle className="text-lg">{aviso.title}</CardTitle>
+                      <CardTitle className="text-lg">{n.title}</CardTitle>
                       <CardDescription className="flex items-center text-sm">
                         <Calendar className="w-4 h-4 mr-2" />
                         {format(
-                          new Date(aviso.created_at),
+                          new Date(n.created_at),
                           "dd 'de' MMMM 'de' yyyy 'às' HH:mm",
                           { locale: ptBR }
                         )}
                       </CardDescription>
                     </div>
-                    <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                      <Bell className="w-5 h-5 text-white" />
-                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {aviso.image_url && (
+                  {n.image_url && (
                     <div>
                       <a
-                        href={aviso.image_url}
+                        href={n.image_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block"
                       >
                         <div className="flex items-center justify-center overflow-hidden rounded-lg bg-black/5">
                           <img
-                            src={aviso.image_url}
-                            alt={aviso.title}
+                            src={n.image_url}
+                            alt={n.title}
                             className="w-full object-contain max-h-[60vh] rounded-lg"
                           />
                         </div>
                       </a>
                     </div>
                   )}
-                  {aviso.description && (
+                  {n.description && (
                     <p className="text-muted-foreground whitespace-pre-wrap">
-                      {aviso.description}
+                      {n.description}
                     </p>
                   )}
                 </CardContent>
@@ -173,4 +193,4 @@ const AvisosPage = () => {
   );
 };
 
-export default AvisosPage;
+export default NoticiasPage;

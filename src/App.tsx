@@ -11,6 +11,8 @@ import DocumentsPage from "./pages/DocumentsPage";
 import AvisosPage from "./pages/AvisosPage";
 import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
+import NoticiasPage from "./pages/NoticiasPage";
+import AdminNoticiasPage from "./pages/AdminNoticiasPage";
 
 const queryClient = new QueryClient();
 
@@ -27,7 +29,9 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/documents/:category" element={<DocumentsPage />} />
             <Route path="/avisos" element={<AvisosPage />} />
+            <Route path="/noticias" element={<NoticiasPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/noticias" element={<AdminNoticiasPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

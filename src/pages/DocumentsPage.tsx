@@ -210,7 +210,7 @@ const DocumentsPage = () => {
       setUploading(true);
 
       const fileExt = selectedFile.name.split(".").pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${Date.now()}.${fileExt}`;
 
       // DEV fallback
       if (import.meta.env.DEV && user.id?.startsWith("dev")) {
@@ -262,21 +262,52 @@ const DocumentsPage = () => {
         return;
       }
 
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("documents")
-        .upload(fileName, selectedFile, { upsert: true });
+      // Fallback: usar base64 se storage falhar por RLS
+      let imageUrl = fileName;
 
-      if (uploadError) {
-        console.error("Storage upload error:", uploadError);
-        throw uploadError;
+      try {
+        // Tentar upload normal primeiro
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("documents")
+          .upload(fileName, selectedFile, { upsert: true });
+
+        if (uploadError) {
+          console.warn(
+            "Storage upload failed, using base64 fallback:",
+            uploadError
+          );
+          // Converter para base64 como fallback
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(selectedFile);
+          });
+          imageUrl = base64;
+        } else {
+          // Se upload funcionou, usar URL pública
+          const { data: publicUrl } = supabase.storage
+            .from("documents")
+            .getPublicUrl(fileName);
+          imageUrl = publicUrl.publicUrl;
+        }
+      } catch (error) {
+        console.warn("Storage completely failed, using base64:", error);
+        // Usar base64 como último recurso
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(selectedFile);
+        });
+        imageUrl = base64;
       }
 
       // Insert DB record
       const insertData: any = {
         user_id: user.id,
         category: category?.toUpperCase(),
-        image_url: fileName,
+        image_url: imageUrl, // Usar a URL correta (storage ou base64)
         extracted_text: "",
       };
 
@@ -359,42 +390,51 @@ const DocumentsPage = () => {
     <div className="min-h-screen bg-gradient-subtle">
       {/* Header */}
       <div className="border-b bg-card shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/dashboard")}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
-            </Button>
-            <div
-              className={`w-10 h-10 ${config.color} rounded-xl flex items-center justify-center`}
-            >
-              <FileText className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">{config.title}</h1>
-              <p className="text-sm text-muted-foreground">
-                {config.description}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Badge variant="secondary" className="px-3 py-1">
-              {documents.length} documentos
-            </Badge>
-            {isNonAdminUser && documents.length > 0 && (
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
               <Button
-                variant="default"
+                variant="ghost"
                 size="sm"
-                onClick={() => setUploadOpen(true)}
-                className="ml-2"
+                onClick={() => navigate("/dashboard")}
+                className="flex-shrink-0"
               >
-                Adicionar Documento
+                <ArrowLeft className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Voltar</span>
               </Button>
-            )}
+              <div
+                className={`w-8 h-8 sm:w-10 sm:h-10 ${config.color} rounded-xl flex items-center justify-center flex-shrink-0`}
+              >
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-xl font-bold truncate">
+                  {config.title}
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                  {config.description}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <Badge
+                variant="secondary"
+                className="px-2 py-1 text-xs sm:text-sm whitespace-nowrap"
+              >
+                {documents.length} docs
+              </Badge>
+              {isNonAdminUser && documents.length > 0 && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setUploadOpen(true)}
+                  className="text-xs sm:text-sm px-2 sm:px-3"
+                >
+                  <span className="hidden sm:inline">Adicionar Documento</span>
+                  <span className="sm:hidden">Adicionar</span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

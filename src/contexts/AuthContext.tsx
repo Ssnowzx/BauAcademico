@@ -44,48 +44,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Helpers para persistência local em DEV
-  const persistDevUser = useCallback((u: User) => {
+  // Helpers para persistência local para TODOS os usuários
+  const persistUser = useCallback((u: User) => {
     try {
-      localStorage.setItem("dev_user", JSON.stringify(u));
+      localStorage.setItem("app_user", JSON.stringify(u));
     } catch (e) {
-      console.warn("Could not persist dev_user", e);
+      console.warn("Could not persist app_user", e);
     }
   }, []);
 
-  const removeDevUser = useCallback(() => {
+  const removeUser = useCallback(() => {
     try {
-      localStorage.removeItem("dev_user");
+      localStorage.removeItem("app_user");
     } catch (e) {
       /* ignore */
     }
   }, []);
 
-  // Helper: ensure a Supabase auth account exists for the given id and try to sign in
-  const ensureAuthAccountAndSignIn = useCallback(async (id: string) => {
+  // Helper: ensure a Supabase auth account exists for admin only
+  const ensureAdminAuthAccount = useCallback(async () => {
     try {
       // Try sign in first
       const signInResult = await supabase.auth.signInWithPassword({
-        email: `${id}@proofchest.local`,
-        password: id,
+        email: DEV_ADMIN_EMAIL,
+        password: DEV_ADMIN_ID,
       });
 
-      // If sign in failed because account does not exist, attempt signup (non-fatal)
+      // If sign in failed because account does not exist, attempt signup
       if (signInResult.error) {
         try {
           await supabase.auth.signUp({
-            email: `${id}@proofchest.local`,
-            password: id,
-            options: { data: { user_id: id } },
+            email: DEV_ADMIN_EMAIL,
+            password: DEV_ADMIN_ID,
+            options: { data: { user_id: DEV_ADMIN_ID } },
           });
         } catch (e) {
-          // Not fatal — log and continue
-          console.warn("Auth signup warning:", e);
+          console.warn("Admin auth signup warning:", e);
         }
       }
     } catch (e) {
-      // Keep non-fatal: we don't want auth issues to block the app
-      console.warn("ensureAuthAccountAndSignIn failed:", e);
+      console.warn("ensureAdminAuthAccount failed:", e);
     }
   }, []);
 
@@ -110,20 +108,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             is_admin: userData.is_admin,
           });
           return;
+        } else {
+          // Se a sessão existe mas não há registro na tabela users,
+          // criar um registro básico para manter a sessão
+          try {
+            const { error: insertError } = await supabase
+              .from("users")
+              .insert({
+                id: session.user.id,
+                username: session.user.email?.split("@")[0] || "user",
+                password: "", // password vazio para auth via Supabase
+                is_admin: false,
+              })
+              .single();
+
+            if (!insertError) {
+              setUser({
+                id: session.user.id,
+                username: session.user.email?.split("@")[0] || "user",
+                is_admin: false,
+              });
+              return;
+            }
+          } catch (insertErr) {
+            console.warn("Failed to create user record:", insertErr);
+          }
+        }
+      }
+
+      // Fallback: restaurar usuário persistido localmente (TODOS os usuários)
+      const raw = localStorage.getItem("app_user");
+      if (raw) {
+        try {
+          const persistedUser = JSON.parse(raw) as User;
+          setUser(persistedUser);
+
+          // Se for admin, garantir auth account existe
+          if (persistedUser.username === "admin") {
+            await ensureAdminAuthAccount();
+          }
+
+          return;
+        } catch (e) {
+          console.warn("Failed to parse app_user from localStorage", e);
         }
       }
 
       // Development fallback: restore persisted dev user (keeps admin during dev reloads)
       if (import.meta.env.DEV) {
-        const raw = localStorage.getItem("dev_user");
-        if (raw) {
+        const devRaw = localStorage.getItem("dev_user");
+        if (devRaw) {
           try {
-            const devUser = JSON.parse(raw) as User;
+            const devUser = JSON.parse(devRaw) as User;
             setUser(devUser);
 
             // If the dev user is admin, ensure an auth account exists so auth.uid() works
             if (devUser.username === "admin") {
-              await ensureAuthAccountAndSignIn(DEV_ADMIN_ID);
+              await ensureAdminAuthAccount();
             }
 
             return;
@@ -137,7 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  }, [ensureAuthAccountAndSignIn]);
+  }, [ensureAdminAuthAccount]);
 
   useEffect(() => {
     void checkUser();
@@ -162,8 +203,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           setUser(devUser);
 
           try {
-            persistDevUser(devUser);
-            await ensureAuthAccountAndSignIn(DEV_ADMIN_ID);
+            persistUser(devUser);
+            await ensureAdminAuthAccount();
           } catch (e) {
             console.warn("Could not persist dev_user or auth", e);
           }
@@ -197,18 +238,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           return false;
         }
 
-        // Use a fixed admin id mapping to keep admin flows consistent
-        const authUserId =
-          userData.username === "admin" ? DEV_ADMIN_ID : userData.id;
+        // Para manter consistência, usar o ID real do usuário para auth
+        const authUserId = userData.id;
 
-        // Ensure auth account exists and sign in (non-fatal if auth fails)
-        await ensureAuthAccountAndSignIn(authUserId);
+        // Para admin, garantir conta Auth existe (para auth.uid() funcionar)
+        if (userData.username === "admin") {
+          await ensureAdminAuthAccount();
+        }
 
         setUser({
           id: authUserId,
           username: userData.username,
           is_admin: userData.is_admin,
         });
+
+        // Persistir TODOS os usuários para manter sessão
+        persistUser({
+          id: authUserId,
+          username: userData.username,
+          is_admin: userData.is_admin,
+        });
+
         toast.success("Login realizado com sucesso!");
         return true;
       } catch (error) {
@@ -223,7 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           };
           setUser(devUser);
           try {
-            persistDevUser(devUser);
+            persistUser(devUser);
           } catch (e) {
             console.warn("Could not persist dev_user", e);
           }
@@ -237,7 +287,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(false);
       }
     },
-    [ensureAuthAccountAndSignIn, persistDevUser]
+    [ensureAdminAuthAccount, persistUser]
   );
 
   // Sign up new user
@@ -271,7 +321,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             };
             setUser(devUser);
             try {
-              persistDevUser(devUser);
+              persistUser(devUser);
               const existing = JSON.parse(
                 localStorage.getItem("dev_documents") || "[]"
               );
@@ -290,22 +340,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           return false;
         }
 
-        // Try to create an Auth user so sign in flow stays consistent (non-fatal)
-        try {
-          await supabase.auth.signUp({
-            email: `${inserted.id}@proofchest.local`,
-            password: inserted.id,
-            options: { data: { user_id: inserted.id } },
-          });
-        } catch (e) {
-          console.warn("Auth signup warning:", e);
-        }
+        // Não criar conta no Supabase Auth para usuários normais
+        // Apenas usar nossa tabela customizada 'users'
 
         setUser({
           id: inserted.id,
           username: inserted.username,
           is_admin: inserted.is_admin,
         });
+
+        // Persistir usuário para manter sessão
+        persistUser({
+          id: inserted.id,
+          username: inserted.username,
+          is_admin: inserted.is_admin,
+        });
+
         toast.success("Conta criada com sucesso!");
         return true;
       } catch (error) {
@@ -316,7 +366,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(false);
       }
     },
-    [persistDevUser]
+    [persistUser]
   );
 
   const logout = useCallback(async () => {
@@ -326,9 +376,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.warn("Supabase signOut failed:", e);
     }
     setUser(null);
-    removeDevUser();
+    removeUser();
     toast.success("Logout realizado com sucesso!");
-  }, [removeDevUser]);
+  }, [removeUser]);
 
   // Memoize context value to avoid unnecessary re-renders
   const value = useMemo(

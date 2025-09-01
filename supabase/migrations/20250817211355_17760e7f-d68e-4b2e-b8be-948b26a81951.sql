@@ -51,8 +51,22 @@ CREATE POLICY "Users can update own profile" ON public.users
 CREATE POLICY "Users can view own documents" ON public.documents
   FOR SELECT USING (user_id = auth.uid()::uuid);
 
-CREATE POLICY "Users can insert own documents" ON public.documents
-  FOR INSERT WITH CHECK (user_id = auth.uid()::uuid);
+-- Permitir que admins gerenciem todos os documentos (mantém privilégios de admin)
+CREATE POLICY "Admins can manage documents" ON public.documents
+  FOR ALL
+  USING (
+    EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid()::uuid AND is_admin = true)
+  )
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid()::uuid AND is_admin = true)
+  );
+
+-- Usuários autenticados podem inserir SOMENTE documentos nas categorias APC e ACE
+CREATE POLICY "Users can insert own documents (APC/ACE only)" ON public.documents
+  FOR INSERT
+  WITH CHECK (
+    user_id = auth.uid()::uuid AND category IN ('APC', 'ACE')
+  );
 
 CREATE POLICY "Users can update own documents" ON public.documents
   FOR UPDATE USING (user_id = auth.uid()::uuid);
@@ -89,18 +103,36 @@ CREATE POLICY "Users can insert own hours" ON public.hours_log
 -- Criar bucket para documentos
 INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', false);
 
--- Políticas de storage para documentos
-CREATE POLICY "Users can view own documents" ON storage.objects
-  FOR SELECT USING (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);
+-- Habilitar RLS em storage.objects (controle de acesso a arquivos)
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can upload own documents" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);
+-- Políticas de storage para o bucket 'documents'
+-- Requer que o nome do objeto comece com o id do usuário: '<USER_ID>/arquivo.ext'
+CREATE POLICY "Users can select own objects in documents bucket" ON storage.objects
+  FOR SELECT
+  USING (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY "Users can update own documents" ON storage.objects
-  FOR UPDATE USING (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Users can insert own objects in documents bucket" ON storage.objects
+  FOR INSERT
+  WITH CHECK (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY "Users can delete own documents" ON storage.objects
-  FOR DELETE USING (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Users can update own objects in documents bucket" ON storage.objects
+  FOR UPDATE
+  USING (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "Users can delete own objects in documents bucket" ON storage.objects
+  FOR DELETE
+  USING (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Admins can manage all objects in the 'documents' bucket
+CREATE POLICY "Admins can manage storage objects in documents bucket" ON storage.objects
+  FOR ALL
+  USING (
+    bucket_id = 'documents' AND EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid()::uuid AND is_admin = true)
+  )
+  WITH CHECK (
+    bucket_id = 'documents' AND EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid()::uuid AND is_admin = true)
+  );
 
 -- Inserir usuário admin padrão (password: admin123)
 INSERT INTO public.users (username, password, is_admin) 

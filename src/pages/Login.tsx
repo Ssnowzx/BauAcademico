@@ -163,14 +163,6 @@ const Login = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Demo credentials */}
-        <div className="text-center text-sm text-muted-foreground">
-          <p>Credenciais de demonstração:</p>
-          <p>
-            <strong>Usuário:</strong> admin | <strong>Senha:</strong> admin123
-          </p>
-        </div>
       </div>
     </div>
   );

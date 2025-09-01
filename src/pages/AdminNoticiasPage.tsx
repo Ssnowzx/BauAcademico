@@ -14,26 +14,26 @@ import { Label } from "@/components/ui/label";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Settings, Plus, Trash2, Edit, Bell } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit, Newspaper } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-interface Aviso {
+interface Noticia {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   image_url: string | null;
   created_at: string;
 }
 
-const AdminPage = () => {
+const AdminNoticiasPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [editingAviso, setEditingAviso] = useState<Aviso | null>(null);
+  const [editing, setEditing] = useState<Noticia | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -45,22 +45,23 @@ const AdminPage = () => {
       navigate("/dashboard");
       return;
     }
-    loadAvisos();
-  }, [user, navigate]);
+    loadNoticias();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
-  const loadAvisos = async () => {
+  const loadNoticias = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("avisos")
+        .from("noticias")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setAvisos(data || []);
-    } catch (error) {
-      console.error("Error loading avisos:", error);
-      toast.error("Erro ao carregar avisos");
+      setNoticias(data || []);
+    } catch (err) {
+      console.error("Error loading noticias:", err);
+      toast.error("Erro ao carregar notícias");
     } finally {
       setLoading(false);
     }
@@ -77,109 +78,97 @@ const AdminPage = () => {
       setSubmitting(true);
       let imageUrl = null;
 
-      console.log("Tentando salvar aviso:", {
-        title: formData.title,
-        description: formData.description,
-      });
-      console.log("Usuário atual:", user);
-
-      // Upload image if provided
       if (formData.image) {
         const fileExt = formData.image.name.split(".").pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("avisos")
+          .from("noticias")
           .upload(filePath, formData.image);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          // Mensagem clara quando o bucket não existe
+          if (
+            uploadError?.message?.toLowerCase()?.includes("bucket not found")
+          ) {
+            toast.error(
+              "Bucket 'noticias' não encontrado. Crie o bucket no painel do Supabase (Storage → Buckets)."
+            );
+            setSubmitting(false);
+            return;
+          }
+
+          throw uploadError;
+        }
 
         const {
           data: { publicUrl },
-        } = supabase.storage.from("avisos").getPublicUrl(filePath);
+        } = supabase.storage.from("noticias").getPublicUrl(filePath);
 
         imageUrl = publicUrl;
       }
 
-      if (editingAviso) {
-        // Update existing aviso
+      if (editing) {
         const updateData: any = {
           title: formData.title,
           description: formData.description,
         };
-
-        if (imageUrl) {
-          updateData.image_url = imageUrl;
-        }
+        if (imageUrl) updateData.image_url = imageUrl;
 
         const { error } = await supabase
-          .from("avisos")
+          .from("noticias")
           .update(updateData)
-          .eq("id", editingAviso.id);
+          .eq("id", editing.id);
 
         if (error) throw error;
-        toast.success("Aviso atualizado com sucesso!");
+        toast.success("Notícia atualizada com sucesso!");
       } else {
-        // Create new aviso
-        const { error } = await supabase.from("avisos").insert({
+        const { error } = await supabase.from("noticias").insert({
           title: formData.title,
           description: formData.description,
           image_url: imageUrl,
         });
 
         if (error) throw error;
-        toast.success("Aviso criado com sucesso!");
+        toast.success("Notícia criada com sucesso!");
       }
 
-      // Reset form
       setFormData({ title: "", description: "", image: null });
-      setEditingAviso(null);
-      loadAvisos();
-    } catch (error) {
-      console.error("Error saving aviso:", error);
-      toast.error("Erro ao salvar aviso");
+      setEditing(null);
+      loadNoticias();
+    } catch (err) {
+      console.error("Error saving noticia:", err);
+      toast.error("Erro ao salvar notícia");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleEdit = (aviso: Aviso) => {
-    setEditingAviso(aviso);
+  const handleEdit = (n: Noticia) => {
+    setEditing(n);
     setFormData({
-      title: aviso.title,
-      description: aviso.description || "",
+      title: n.title,
+      description: n.description || "",
       image: null,
     });
   };
 
-  const handleDelete = async (avisoId: string) => {
-    if (!confirm("Tem certeza que deseja excluir este aviso?")) return;
-
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta notícia?")) return;
     try {
-      const { error } = await supabase
-        .from("avisos")
-        .delete()
-        .eq("id", avisoId);
-
+      const { error } = await supabase.from("noticias").delete().eq("id", id);
       if (error) throw error;
-
-      setAvisos(avisos.filter((aviso) => aviso.id !== avisoId));
-      toast.success("Aviso excluído com sucesso");
-    } catch (error) {
-      console.error("Error deleting aviso:", error);
-      toast.error("Erro ao excluir aviso");
+      setNoticias(noticias.filter((x) => x.id !== id));
+      toast.success("Notícia excluída com sucesso");
+    } catch (err) {
+      console.error("Error deleting noticia:", err);
+      toast.error("Erro ao excluir notícia");
     }
   };
 
-  const cancelEdit = () => {
-    setEditingAviso(null);
-    setFormData({ title: "", description: "", image: null });
-  };
-
-  if (!user?.is_admin) {
-    return null;
-  }
+  if (!user?.is_admin) return null;
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -187,19 +176,17 @@ const AdminPage = () => {
       <div className="border-b bg-card shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            {/* Left side - Logo and title */}
-            <div className="flex items-center space-x-3">
-              <img
-                src="/logoinicio.png"
-                alt="BaúAcadêmico"
-                className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-full ring-1 ring-white/6 flex-shrink-0"
-              />
+            {/* Left side - Icon and title */}
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-cyan-500 to-fuchsia-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-                  Painel Administrativo
+                  Gerenciar Notícias
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                  Gerenciar avisos do sistema
+                  Criar, editar e remover notícias
                 </p>
               </div>
             </div>
@@ -220,21 +207,19 @@ const AdminPage = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Form Section */}
           <div>
             <Card className="shadow-lg border-0 shadow-cosmic/20">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Plus className="w-5 h-5 mr-2" />
-                  {editingAviso ? "Editar Aviso" : "Novo Aviso"}
+                  {editing ? "Editar Notícia" : "Nova Notícia"}
                 </CardTitle>
                 <CardDescription>
-                  {editingAviso
-                    ? "Atualize as informações do aviso"
-                    : "Crie um novo aviso para todos os usuários"}
+                  {editing
+                    ? "Atualize as informações da notícia"
+                    : "Crie uma nova notícia para exibir no feed"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -243,13 +228,10 @@ const AdminPage = () => {
                     <Label htmlFor="title">Título *</Label>
                     <Input
                       id="title"
-                      placeholder="Digite o título do aviso"
+                      placeholder="Digite o título da notícia"
                       value={formData.title}
                       onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
+                        setFormData((p) => ({ ...p, title: e.target.value }))
                       }
                       disabled={submitting}
                     />
@@ -258,11 +240,11 @@ const AdminPage = () => {
                     <Label htmlFor="description">Descrição</Label>
                     <Textarea
                       id="description"
-                      placeholder="Digite a descrição detalhada do aviso"
+                      placeholder="Texto da notícia"
                       value={formData.description}
                       onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
+                        setFormData((p) => ({
+                          ...p,
                           description: e.target.value,
                         }))
                       }
@@ -277,8 +259,8 @@ const AdminPage = () => {
                       type="file"
                       accept="image/*"
                       onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
+                        setFormData((p) => ({
+                          ...p,
                           image: e.target.files?.[0] || null,
                         }))
                       }
@@ -297,17 +279,24 @@ const AdminPage = () => {
                           <LoadingSpinner size="sm" className="mr-2" />
                           Salvando...
                         </>
-                      ) : editingAviso ? (
-                        "Atualizar Aviso"
+                      ) : editing ? (
+                        "Atualizar Notícia"
                       ) : (
-                        "Criar Aviso"
+                        "Criar Notícia"
                       )}
                     </Button>
-                    {editingAviso && (
+                    {editing && (
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={cancelEdit}
+                        onClick={() => {
+                          setEditing(null);
+                          setFormData({
+                            title: "",
+                            description: "",
+                            image: null,
+                          });
+                        }}
                         disabled={submitting}
                       >
                         Cancelar
@@ -319,17 +308,16 @@ const AdminPage = () => {
             </Card>
           </div>
 
-          {/* Avisos List */}
           <div>
             <Card className="shadow-lg border-0 shadow-cosmic/20">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center">
-                    <Bell className="w-5 h-5 mr-2" />
-                    Avisos Cadastrados
+                    <Newspaper className="w-5 h-5 mr-2" />
+                    Notícias Cadastradas
                   </span>
                   <span className="text-sm font-normal text-muted-foreground">
-                    {avisos.length} avisos
+                    {noticias.length} notícias
                   </span>
                 </CardTitle>
               </CardHeader>
@@ -338,29 +326,29 @@ const AdminPage = () => {
                   <div className="flex items-center justify-center py-8">
                     <LoadingSpinner size="lg" />
                   </div>
-                ) : avisos.length === 0 ? (
+                ) : noticias.length === 0 ? (
                   <div className="text-center py-8">
-                    <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <Newspaper className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                     <p className="text-muted-foreground">
-                      Nenhum aviso cadastrado
+                      Nenhuma notícia cadastrada
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {avisos.map((aviso) => (
+                    {noticias.map((n) => (
                       <div
-                        key={aviso.id}
+                        key={n.id}
                         className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                       >
                         <div className="flex items-start justify-between mb-2">
                           <h4 className="font-medium line-clamp-1">
-                            {aviso.title}
+                            {n.title}
                           </h4>
                           <div className="flex items-center space-x-1 ml-2">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(aviso)}
+                              onClick={() => handleEdit(n)}
                               className="h-8 w-8 p-0"
                             >
                               <Edit className="w-3 h-3" />
@@ -368,30 +356,30 @@ const AdminPage = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(aviso.id)}
+                              onClick={() => handleDelete(n.id)}
                               className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
                           </div>
                         </div>
-                        {aviso.image_url && (
+                        {n.image_url && (
                           <div className="mb-2">
                             <img
-                              src={aviso.image_url}
-                              alt={aviso.title}
+                              src={n.image_url}
+                              alt={n.title}
                               className="w-full h-32 object-cover rounded-md"
                             />
                           </div>
                         )}
-                        {aviso.description && (
+                        {n.description && (
                           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {aviso.description}
+                            {n.description}
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
                           {format(
-                            new Date(aviso.created_at),
+                            new Date(n.created_at),
                             "dd/MM/yyyy 'às' HH:mm",
                             { locale: ptBR }
                           )}
@@ -409,4 +397,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;
+export default AdminNoticiasPage;

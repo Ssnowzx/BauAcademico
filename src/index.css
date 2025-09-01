@@ -222,13 +222,20 @@
   .light-field .form-control,
   .light-field .file-input,
   .light-field .select {
-    color: hsl(0 0% 6%) !important; /* near-black for maximum contrast on white/light backgrounds */
+    color: hsl(
+      0 0% 6%
+    ) !important; /* near-black for maximum contrast on white/light backgrounds */
   }
 
   .light-field input::placeholder,
   .light-field textarea::placeholder,
   .light-field select::placeholder {
-    color: rgba(0, 0, 0, 0.45) !important; /* darker placeholder for readability on white */
+    color: rgba(
+      0,
+      0,
+      0,
+      0.45
+    ) !important; /* darker placeholder for readability on white */
   }
 
   /* Keep default button/text color for buttons (on dark surfaces) */
