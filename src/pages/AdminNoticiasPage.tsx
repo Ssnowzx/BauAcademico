@@ -49,6 +49,30 @@ const AdminNoticiasPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Função para garantir URL de imagem funcional no Chrome
+  const getImageUrl = (url: string | null) => {
+    if (!url) return null;
+
+    // Se já é uma URL completa (http/https ou data:base64), retorna direto
+    if (url.startsWith("http") || url.startsWith("data:")) {
+      // Se é URL do Supabase e não tem timestamp, adiciona um para Chrome
+      if (url.includes("supabase.co") && !url.includes("?t=")) {
+        return `${url}?t=${Date.now()}&cache=no-cache`;
+      }
+      return url;
+    }
+
+    // Se é um path do Supabase Storage, gera URL pública
+    try {
+      const { data } = supabase.storage.from("noticias").getPublicUrl(url);
+      // Força reload no Chrome adicionando timestamp
+      return `${data.publicUrl}?t=${Date.now()}&cache=no-cache`;
+    } catch (error) {
+      console.warn("Erro ao gerar URL da imagem:", error);
+      return url;
+    }
+  };
+
   const loadNoticias = async () => {
     try {
       setLoading(true);
@@ -85,7 +109,10 @@ const AdminNoticiasPage = () => {
 
         const { error: uploadError } = await supabase.storage
           .from("noticias")
-          .upload(filePath, formData.image);
+          .upload(filePath, formData.image, {
+            cacheControl: "3600", // Cache por 1 hora
+            upsert: false,
+          });
 
         if (uploadError) {
           console.error("Upload error:", uploadError);
@@ -107,7 +134,9 @@ const AdminNoticiasPage = () => {
           data: { publicUrl },
         } = supabase.storage.from("noticias").getPublicUrl(filePath);
 
+        // Salvar URL limpa no banco (sem timestamp)
         imageUrl = publicUrl;
+        console.log("Image uploaded successfully:", imageUrl);
       }
 
       if (editing) {
@@ -257,16 +286,41 @@ const AdminNoticiasPage = () => {
                     <Input
                       id="image"
                       type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        setFormData((p) => ({
-                          ...p,
-                          image: e.target.files?.[0] || null,
-                        }))
-                      }
+                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        if (file) {
+                          // Validar formato de arquivo
+                          const validFormats = [
+                            "image/jpeg",
+                            "image/jpg",
+                            "image/png",
+                            "image/gif",
+                            "image/webp",
+                          ];
+                          if (!validFormats.includes(file.type)) {
+                            toast.error(
+                              "Formato não suportado. Use JPG, PNG, GIF ou WebP"
+                            );
+                            e.target.value = "";
+                            return;
+                          }
+
+                          // Validar tamanho (max 5MB)
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast.error("Arquivo muito grande. Máximo 5MB");
+                            e.target.value = "";
+                            return;
+                          }
+                        }
+                        setFormData((p) => ({ ...p, image: file }));
+                      }}
                       disabled={submitting}
                       className="file:text-primary-foreground file:bg-primary file:border-0 file:rounded-md file:px-3 file:py-1 file:mr-3"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Formatos suportados: JPG, PNG, GIF, WebP • Máximo: 5MB
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -366,9 +420,22 @@ const AdminNoticiasPage = () => {
                         {n.image_url && (
                           <div className="mb-2">
                             <img
-                              src={n.image_url}
+                              src={getImageUrl(n.image_url) || ""}
                               alt={n.title}
                               className="w-full h-32 object-cover rounded-md"
+                              loading="lazy"
+                              crossOrigin="anonymous"
+                              onError={(e) => {
+                                console.warn(
+                                  "Erro ao carregar imagem no admin:",
+                                  n.image_url
+                                );
+                                // Fallback: tentar URL original
+                                const target = e.target as HTMLImageElement;
+                                if (target.src !== n.image_url) {
+                                  target.src = n.image_url;
+                                }
+                              }}
                             />
                           </div>
                         )}

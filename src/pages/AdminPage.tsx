@@ -14,16 +14,39 @@ import { Label } from "@/components/ui/label";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Settings, Plus, Trash2, Edit, Bell } from "lucide-react";
+import {
+  ArrowLeft,
+  Settings,
+  Plus,
+  Trash2,
+  Edit,
+  Bell,
+  FileText,
+  Download,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+interface FileData {
+  url: string;
+  name: string;
+  type: string;
+  size: number;
+}
 
 interface Aviso {
   id: string;
   title: string;
   description: string;
   image_url: string | null;
+  files?: FileData[];
+  // Campos legados para compatibilidade
+  file_url?: string | null;
+  file_name?: string | null;
+  file_type?: string | null;
+  file_size?: number | null;
   created_at: string;
 }
 
@@ -38,6 +61,7 @@ const AdminPage = () => {
     title: "",
     description: "",
     image: null as File | null,
+    files: [] as File[], // Array de arquivos PDF
   });
 
   useEffect(() => {
@@ -57,7 +81,11 @@ const AdminPage = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setAvisos(data || []);
+
+      console.log("📥 Avisos carregados:", data?.length || 0);
+
+      const avisosData = (data as Aviso[]) || [];
+      setAvisos(avisosData);
     } catch (error) {
       console.error("Error loading avisos:", error);
       toast.error("Erro ao carregar avisos");
@@ -102,6 +130,75 @@ const AdminPage = () => {
         imageUrl = publicUrl;
       }
 
+      // Upload multiple files if provided
+      const uploadedFiles: FileData[] = [];
+
+      if (formData.files && formData.files.length > 0) {
+        console.log(
+          "📤 Iniciando upload de",
+          formData.files.length,
+          "arquivos"
+        );
+
+        for (let i = 0; i < formData.files.length; i++) {
+          const file = formData.files[i];
+          const fileExt = file.name.split(".").pop();
+          const uploadFileName = `${Date.now()}_${Math.random()
+            .toString(36)
+            .substr(2, 9)}.${fileExt}`;
+          const filePath = `files/${uploadFileName}`;
+          let fileUrl: string;
+
+          try {
+            const { error: uploadError } = await supabase.storage
+              .from("avisos")
+              .upload(filePath, file);
+
+            if (uploadError) {
+              console.warn(`⚠️ Upload falhou para ${file.name}, usando base64`);
+              // Fallback para base64
+              const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+              fileUrl = base64;
+            } else {
+              const {
+                data: { publicUrl },
+              } = supabase.storage.from("avisos").getPublicUrl(filePath);
+              fileUrl = publicUrl;
+            }
+          } catch (error) {
+            console.error(`❌ Erro ao fazer upload de ${file.name}:`, error);
+            // Fallback para base64
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+            fileUrl = base64;
+          }
+
+          const processedFile = {
+            url: fileUrl,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+          };
+
+          uploadedFiles.push(processedFile);
+        }
+
+        console.log(
+          "✅ Upload concluído:",
+          uploadedFiles.length,
+          "arquivos processados"
+        );
+      }
+
       if (editingAviso) {
         // Update existing aviso
         const updateData: any = {
@@ -113,6 +210,15 @@ const AdminPage = () => {
           updateData.image_url = imageUrl;
         }
 
+        // Merge new files with existing ones (if editing)
+        let allFiles = [...(editingAviso.files || [])];
+        if (uploadedFiles.length > 0) {
+          allFiles = [...allFiles, ...uploadedFiles];
+        }
+        if (allFiles.length > 0) {
+          updateData.files = allFiles;
+        }
+
         const { error } = await supabase
           .from("avisos")
           .update(updateData)
@@ -122,18 +228,32 @@ const AdminPage = () => {
         toast.success("Aviso atualizado com sucesso!");
       } else {
         // Create new aviso
-        const { error } = await supabase.from("avisos").insert({
+        const insertData: any = {
           title: formData.title,
           description: formData.description,
           image_url: imageUrl,
-        });
+          files: uploadedFiles,
+        };
+
+        console.log(
+          "💾 Salvando aviso no banco com",
+          uploadedFiles.length,
+          "arquivos"
+        );
+
+        const { error } = await supabase.from("avisos").insert(insertData);
+
+        if (error) {
+          console.error("❌ Erro ao inserir no banco:", error);
+          throw error;
+        }
 
         if (error) throw error;
         toast.success("Aviso criado com sucesso!");
       }
 
       // Reset form
-      setFormData({ title: "", description: "", image: null });
+      setFormData({ title: "", description: "", image: null, files: [] });
       setEditingAviso(null);
       loadAvisos();
     } catch (error) {
@@ -150,6 +270,7 @@ const AdminPage = () => {
       title: aviso.title,
       description: aviso.description || "",
       image: null,
+      files: [],
     });
   };
 
@@ -174,7 +295,7 @@ const AdminPage = () => {
 
   const cancelEdit = () => {
     setEditingAviso(null);
-    setFormData({ title: "", description: "", image: null });
+    setFormData({ title: "", description: "", image: null, files: [] });
   };
 
   if (!user?.is_admin) {
@@ -286,6 +407,191 @@ const AdminPage = () => {
                       className="file:text-primary-foreground file:bg-primary file:border-0 file:rounded-md file:px-3 file:py-1 file:mr-3"
                     />
                   </div>
+
+                  {/* Campo para múltiplos arquivos PDF */}
+                  <div className="space-y-2">
+                    <Label htmlFor="files">
+                      Arquivos para Download (opcional)
+                    </Label>
+                    <div
+                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-primary/50 transition-colors"
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const droppedFiles = Array.from(e.dataTransfer.files);
+                        console.log(
+                          "📁 Arquivos arrastados:",
+                          droppedFiles.length
+                        );
+
+                        // Filtrar apenas arquivos aceitos
+                        const acceptedFiles = droppedFiles.filter((file) => {
+                          const extension = file.name
+                            .toLowerCase()
+                            .split(".")
+                            .pop();
+                          return ["pdf", "txt", "doc", "docx"].includes(
+                            extension || ""
+                          );
+                        });
+
+                        if (acceptedFiles.length !== droppedFiles.length) {
+                          toast.error(
+                            `${
+                              droppedFiles.length - acceptedFiles.length
+                            } arquivo(s) rejeitado(s). Apenas PDF, TXT, DOC e DOCX são aceitos.`
+                          );
+                        }
+
+                        if (acceptedFiles.length > 0) {
+                          // Validar tamanho
+                          const invalidFiles = acceptedFiles.filter(
+                            (file) => file.size > 10 * 1024 * 1024
+                          );
+                          if (invalidFiles.length > 0) {
+                            toast.error(
+                              `${invalidFiles.length} arquivo(s) muito grande(s). Máximo 10MB por arquivo.`
+                            );
+                            return;
+                          }
+
+                          setFormData((prev) => ({
+                            ...prev,
+                            files: [...prev.files, ...acceptedFiles],
+                          }));
+                        }
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.classList.add("border-primary");
+                      }}
+                      onDragLeave={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.classList.remove("border-primary");
+                      }}
+                    >
+                      <input
+                        id="files"
+                        type="file"
+                        accept=".pdf,.txt,.doc,.docx"
+                        multiple
+                        onChange={(e) => {
+                          console.log(
+                            "📁 Arquivos selecionados:",
+                            e.target.files?.length || 0
+                          );
+
+                          // Log detalhado de cada arquivo
+                          if (e.target.files) {
+                            for (let i = 0; i < e.target.files.length; i++) {
+                              const file = e.target.files[i];
+                              console.log(`📄 Arquivo ${i + 1}:`, {
+                                name: file.name,
+                                size: file.size,
+                                type: file.type,
+                              });
+                            }
+                          }
+
+                          const files = Array.from(e.target.files || []);
+
+                          // Validar tamanho de cada arquivo
+                          const invalidFiles = files.filter(
+                            (file) => file.size > 10 * 1024 * 1024
+                          );
+                          if (invalidFiles.length > 0) {
+                            toast.error(
+                              `${invalidFiles.length} arquivo(s) muito grande(s). Máximo 10MB por arquivo.`
+                            );
+                            e.target.value = "";
+                            return;
+                          }
+
+                          setFormData((prev) => ({
+                            ...prev,
+                            files: files,
+                          }));
+                        }}
+                        disabled={submitting}
+                        className="w-full cursor-pointer"
+                        style={{ display: "none" }}
+                      />
+                      <label
+                        htmlFor="files"
+                        className="cursor-pointer flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <FileText className="w-8 h-8" />
+                        <div>
+                          <p className="font-medium">
+                            Clique para selecionar arquivos
+                          </p>
+                          <p className="text-xs">ou arraste e solte aqui</p>
+                        </div>
+                      </label>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Formatos aceitos: PDF, TXT, DOC, DOCX (máx. 10MB por
+                      arquivo).
+                      <strong>
+                        {" "}
+                        Segure Ctrl/Cmd para selecionar múltiplos arquivos.
+                      </strong>
+                    </p>
+
+                    {/* Mostrar arquivos selecionados */}
+                    {formData.files.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">
+                            Arquivos selecionados ({formData.files.length}):
+                          </p>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-700 h-6 px-2"
+                            onClick={() => {
+                              setFormData((prev) => ({ ...prev, files: [] }));
+                              // Limpar input também
+                              const fileInput = document.getElementById(
+                                "files"
+                              ) as HTMLInputElement;
+                              if (fileInput) fileInput.value = "";
+                            }}
+                          >
+                            Limpar todos
+                          </Button>
+                        </div>
+                        {formData.files.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 text-sm text-muted-foreground"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span className="flex-1 truncate">{file.name}</span>
+                            <span className="text-xs">
+                              ({Math.round(file.size / 1024)}KB)
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  files: prev.files.filter(
+                                    (_, i) => i !== index
+                                  ),
+                                }));
+                              }}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       type="submit"
@@ -384,6 +690,45 @@ const AdminPage = () => {
                             />
                           </div>
                         )}
+
+                        {/* Mostrar múltiplos arquivos (novo formato) */}
+                        {aviso.files && aviso.files.length > 0 && (
+                          <div className="mb-2 space-y-2">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Arquivos ({aviso.files.length}):
+                            </p>
+                            {aviso.files.map((file, index) => (
+                              <div
+                                key={index}
+                                className="p-2 bg-muted/50 rounded-md"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <FileText className="w-4 h-4 text-muted-foreground" />
+                                  <span className="text-sm font-medium truncate flex-1">
+                                    {file.name}
+                                  </span>
+                                  <a
+                                    href={file.url}
+                                    download={file.name}
+                                    className="ml-auto"
+                                  >
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                    >
+                                      <Download className="w-3 h-3" />
+                                    </Button>
+                                  </a>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {file.type} • {Math.round(file.size / 1024)}KB
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
                         {aviso.description && (
                           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                             {aviso.description}

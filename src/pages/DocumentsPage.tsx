@@ -425,10 +425,16 @@ const DocumentsPage = () => {
               </Badge>
               {isNonAdminUser && documents.length > 0 && (
                 <Button
-                  variant="default"
+                  variant="outline"
                   size="sm"
                   onClick={() => setUploadOpen(true)}
-                  className="text-xs sm:text-sm px-2 sm:px-3"
+                  className={`text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 ${
+                    category === "apc"
+                      ? "border-purple-500/30 text-purple-500 hover:bg-purple-500/10 hover:border-purple-500/50"
+                      : category === "ace"
+                      ? "border-blue-500/30 text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/50"
+                      : "border-green-500/30 text-green-500 hover:bg-green-500/10 hover:border-green-500/50"
+                  }`}
                 >
                   <span className="hidden sm:inline">Adicionar Documento</span>
                   <span className="sm:hidden">Adicionar</span>
@@ -454,7 +460,17 @@ const DocumentsPage = () => {
             <p className="text-muted-foreground mb-6">
               Você ainda não tem documentos da categoria {config.title}
             </p>
-            <Button onClick={() => setUploadOpen(true)}>
+            <Button
+              onClick={() => setUploadOpen(true)}
+              variant="outline"
+              className={`transition-all duration-200 ${
+                category === "apc"
+                  ? "border-purple-500/30 text-purple-500 hover:bg-purple-500/10 hover:border-purple-500/50"
+                  : category === "ace"
+                  ? "border-blue-500/30 text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/50"
+                  : "border-green-500/30 text-green-500 hover:bg-green-500/10 hover:border-green-500/50"
+              }`}
+            >
               Adicionar Primeiro Documento
             </Button>
           </div>
