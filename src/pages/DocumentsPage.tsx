@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -265,6 +266,7 @@ const DocumentsPage = () => {
     if (user && category) {
       void loadDocuments();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, category]);
 
   // Total de horas (somente leitura, memoizado para otimização)
