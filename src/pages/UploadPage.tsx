@@ -24,12 +24,14 @@ const UploadPage = () => {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    category: "APC" as "APC" | "ACE" | "RECIBO",
+    category: "APC" as "APC" | "ACE" | "RECIBO" | "PROVAS",
     file: null as File | null,
     evento: "",
     horas: "",
     data_evento: "",
     observacao: "",
+    materia: "",
+    nota: "",
   });
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,13 +87,15 @@ const UploadPage = () => {
 
       interface InsertUploadDocument {
         user_id: string;
-        category: "APC" | "ACE" | "RECIBO";
+        category: "APC" | "ACE" | "RECIBO" | "PROVAS";
         image_url: string;
         extracted_text: string;
         evento?: string;
         horas?: number;
         data_evento?: string;
         observacao?: string;
+        materia?: string;
+        nota?: number;
       }
 
       const insertData: InsertUploadDocument = {
@@ -111,6 +115,10 @@ const UploadPage = () => {
       } else if (formData.category === "RECIBO") {
         if (formData.observacao.trim())
           insertData.observacao = formData.observacao.trim();
+      } else if (formData.category === "PROVAS") {
+        if (formData.materia.trim())
+          insertData.materia = formData.materia.trim();
+        if (formData.nota !== "") insertData.nota = parseFloat(formData.nota);
       }
 
       const { data, error } = await supabase
@@ -137,6 +145,25 @@ const UploadPage = () => {
             // não interrompe o fluxo principal, apenas notifica em console
           }
         }
+
+        // Se for PROVAS, inserir também na tabela dedicada 'provas' para consultas e médias
+        if (insertData.category === "PROVAS") {
+          try {
+            const { error: provasError } = await supabase
+              .from("provas")
+              .insert({
+                user_id: user.id,
+                materia: insertData.materia || null,
+                nota: insertData.nota ?? null,
+                image_url: publicUrl,
+              });
+            if (provasError) {
+              console.warn("Failed to insert into provas:", provasError);
+            }
+          } catch (e) {
+            console.warn("provas insertion failed:", e);
+          }
+        }
       } catch (e) {
         console.warn("hours_log insertion failed:", e);
       }
@@ -151,6 +178,8 @@ const UploadPage = () => {
         horas: "",
         data_evento: "",
         observacao: "",
+        materia: "",
+        nota: "",
       });
       setPreview(null);
       navigate("/dashboard");
@@ -164,41 +193,37 @@ const UploadPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div className="border-b bg-card shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* Left side - Icon and title */}
-            {/* Logo grande no header; texto aproximado sem reduzir a imagem */}
-            <div className="flex items-center space-x-1 min-w-0 flex-1">
-              <div className="flex items-center justify-center flex-shrink-0">
-                <img
-                  src="/logo.png"
-                  alt="Logo"
-                  className="w-24 sm:w-36 md:w-48 object-contain mr-0"
-                />
-              </div>
-              <div className="min-w-0 -ml-3 sm:-ml-4">
-                <h1 className="text-base sm:text-lg md:text-xl font-semibold text-foreground leading-tight truncate">
-                  Adicionar Documento
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-snug truncate">
+      {/* Header - Rounded and Suspended */}
+      <div className="mx-2 mt-2 mb-6">
+        <div
+          className="bg-card shadow-lg px-3 py-2 sm:px-6 sm:py-3"
+          style={{
+            borderTop: "1px solid oklch(0.627 0.265 303.9)",
+            borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+            borderRight: "4px solid oklch(0.627 0.265 303.9)",
+            borderBottom: "4px solid oklch(0.627 0.265 303.9)",
+            borderRadius: "0.75rem",
+            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+          }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/dashboard")}
+                className="border-primary/20 hover:bg-primary/5 text-primary"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+              <Upload className="w-6 h-6 text-primary" />
+              <div>
+                <h1 className="text-lg font-bold">Adicionar Documento</h1>
+                <p className="text-xs text-muted-foreground">
                   Upload de comprovantes e recibos
                 </p>
               </div>
-            </div>
-
-            {/* Right side - Actions */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/dashboard")}
-                className="text-xs sm:text-sm"
-              >
-                <ArrowLeft className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Voltar</span>
-              </Button>
             </div>
           </div>
         </div>
@@ -206,8 +231,18 @@ const UploadPage = () => {
 
       {/* Content */}
       {/* Conteúdo principal com largura um pouco menor para melhor leitura */}
-      <div className="container mx-auto px-4 py-8 max-w-xl">
-        <Card className="shadow-lg shadow-cosmic/20 border-vibrant">
+      <div className="container mx-auto px-4 max-w-xl">
+        <Card
+          className="shadow-lg"
+          style={{
+            borderTop: "1px solid oklch(0.627 0.265 303.9)",
+            borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+            borderRight: "4px solid oklch(0.627 0.265 303.9)",
+            borderBottom: "4px solid oklch(0.627 0.265 303.9)",
+            borderRadius: "0.75rem",
+            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+          }}
+        >
           <CardHeader>
             <CardTitle className="flex items-center">
               <Camera className="w-5 h-5 mr-2" />
@@ -228,7 +263,11 @@ const UploadPage = () => {
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      category: e.target.value as "APC" | "ACE" | "RECIBO",
+                      category: e.target.value as
+                        | "APC"
+                        | "ACE"
+                        | "RECIBO"
+                        | "PROVAS",
                     }))
                   }
                   className="w-full px-3 py-2 border border-input rounded-md bg-card"
@@ -237,6 +276,7 @@ const UploadPage = () => {
                   <option value="APC">APC</option>
                   <option value="ACE">ACE</option>
                   <option value="RECIBO">RECIBO</option>
+                  <option value="PROVAS">PROVAS / TRABALHOS</option>
                 </select>
               </div>
 
@@ -290,6 +330,45 @@ const UploadPage = () => {
                       }
                       disabled={uploading}
                       className="mt-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Campos extras para PROVAS */}
+              {formData.category === "PROVAS" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="materia">Matéria</Label>
+                    <Input
+                      id="materia"
+                      placeholder="Ex: Matemática"
+                      value={formData.materia}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          materia: e.target.value,
+                        }))
+                      }
+                      disabled={uploading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nota">Nota</Label>
+                    <Input
+                      id="nota"
+                      type="number"
+                      placeholder="Ex: 8.5"
+                      value={formData.nota}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          nota: e.target.value,
+                        }))
+                      }
+                      disabled={uploading}
+                      min="0"
+                      step="0.01"
                     />
                   </div>
                 </>

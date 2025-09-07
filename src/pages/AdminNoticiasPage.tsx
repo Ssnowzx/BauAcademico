@@ -200,37 +200,42 @@ const AdminNoticiasPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div className="border-b bg-card shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* Left side - Icon and title */}
-            <div className="flex items-center space-x-3 min-w-0 flex-1">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-cosmic rounded-xl flex items-center justify-center flex-shrink-0">
-                <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-                  Gerenciar Notícias
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
+      {/* Header - Rounded and Suspended */}
+      <div className="mx-2 mt-2 mb-6">
+        <div
+          className="bg-card shadow-lg px-3 py-2 sm:px-6 sm:py-3"
+          style={{
+            borderTop: "1px solid oklch(0.627 0.265 303.9)",
+            borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+            borderRight: "4px solid oklch(0.627 0.265 303.9)",
+            borderBottom: "4px solid oklch(0.627 0.265 303.9)",
+            borderRadius: "0.75rem",
+            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+          }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/admin")}
+                className="border-primary/20 hover:bg-primary/5 text-primary"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+              <Newspaper className="w-6 h-6 text-primary" />
+              <div>
+                <h1 className="text-lg font-bold">Gerenciar Notícias</h1>
+                <p className="text-xs text-muted-foreground">
                   Criar, editar e remover notícias
                 </p>
               </div>
             </div>
-
-            {/* Right side - Actions */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/dashboard")}
-                className="text-xs sm:text-sm"
-              >
-                <ArrowLeft className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Voltar</span>
-              </Button>
-            </div>
+            <Button onClick={() => setEditing(null)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Notícia
+            </Button>
           </div>
         </div>
       </div>
@@ -238,7 +243,17 @@ const AdminNoticiasPage = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
-            <Card className="shadow-lg shadow-cosmic/20 border-vibrant">
+            <Card
+              className="shadow-lg"
+              style={{
+                borderTop: "1px solid oklch(0.627 0.265 303.9)",
+                borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+                borderRight: "4px solid oklch(0.627 0.265 303.9)",
+                borderBottom: "4px solid oklch(0.627 0.265 303.9)",
+                borderRadius: "0.75rem",
+                boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+              }}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Plus className="w-5 h-5 mr-2" />
@@ -362,7 +377,17 @@ const AdminNoticiasPage = () => {
           </div>
 
           <div>
-            <Card className="shadow-lg shadow-cosmic/20 border-vibrant">
+            <Card
+              className="shadow-lg"
+              style={{
+                borderTop: "1px solid oklch(0.627 0.265 303.9)",
+                borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+                borderRight: "4px solid oklch(0.627 0.265 303.9)",
+                borderBottom: "4px solid oklch(0.627 0.265 303.9)",
+                borderRadius: "0.75rem",
+                boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+              }}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center">

@@ -83,7 +83,7 @@ const Login = () => {
             borderBottom: "6px solid oklch(0.65 0.28 303.9)",
             borderRadius: "0.75rem",
             boxShadow:
-              "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+              "0 6px 16px rgba(0, 0, 0, 0.15)",
           }}
         >
           <CardHeader className="space-y-1">
@@ -148,7 +148,7 @@ const Login = () => {
                   borderBottom: "6px solid oklch(0.65 0.28 303.9)",
                   borderRadius: "0.75rem",
                   boxShadow:
-                    "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+                    "0 6px 16px rgba(0, 0, 0, 0.15)",
                 }}
                 disabled={
                   isLoading ||

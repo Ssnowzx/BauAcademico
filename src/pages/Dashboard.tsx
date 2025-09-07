@@ -24,35 +24,60 @@ const Dashboard = () => {
       description: "Atividades Práticas Curriculares",
       icon: Award,
       path: "/documents/apc",
-      gradient: "bg-gradient-chart-1",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
+      hoverColor: "group-hover:text-emerald-700",
+      hoverBg: "group-hover:bg-emerald-100",
     },
     {
       title: "ACE",
       description: "Atividades Complementares de Ensino",
       icon: GraduationCap,
       path: "/documents/ace",
-      gradient: "bg-gradient-chart-2",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      hoverColor: "group-hover:text-blue-700",
+      hoverBg: "group-hover:bg-blue-100",
     },
     {
       title: "RECIBOS",
       description: "Comprovantes de Mensalidade",
       icon: Receipt,
       path: "/documents/recibos",
-      gradient: "bg-gradient-chart-3",
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+      hoverColor: "group-hover:text-amber-700",
+      hoverBg: "group-hover:bg-amber-100",
+    },
+    {
+      title: "PROVAS / TRABALHOS",
+      description: "Notas e comprovantes acadêmicos (Provas e Trabalhos)",
+      icon: FileText,
+      path: "/documents/provas",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      hoverColor: "group-hover:text-purple-700",
+      hoverBg: "group-hover:bg-purple-100",
     },
     {
       title: "AVISOS",
       description: "Comunicados e Notícias",
       icon: Bell,
       path: "/avisos",
-      gradient: "bg-gradient-destructive",
+      color: "text-rose-600",
+      bgColor: "bg-rose-50",
+      hoverColor: "group-hover:text-rose-700",
+      hoverBg: "group-hover:bg-rose-100",
     },
     {
       title: "NOTÍCIAS",
       description: "Últimas notícias e atualizações",
       icon: Newspaper,
       path: "/noticias",
-      gradient: "bg-gradient-cosmic",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50",
+      hoverColor: "group-hover:text-indigo-700",
+      hoverBg: "group-hover:bg-indigo-100",
     },
   ];
 
@@ -63,29 +88,28 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div
-        className="bg-card shadow-sm mx-5 mt-4 mb-6"
-        style={{
-          borderRadius: "0.75rem",
-          borderTop: "1px solid oklch(0.627 0.265 303.9)",
-          borderLeft: "1px solid oklch(0.627 0.265 303.9)",
-          borderRight: "4px solid oklch(0.627 0.265 303.9)",
-          borderBottom: "4px solid oklch(0.627 0.265 303.9)",
-          boxShadow:
-            "0 4px 12px color-mix(in oklch, oklch(0.627 0.265 303.9), transparent 75%)",
-        }}
-      >
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-1 min-w-0 flex-1">
+      {/* Header - Rounded and Suspended */}
+      <div className="mx-2 mt-2 mb-6">
+        <div
+          className="bg-card shadow-lg px-3 py-2 sm:px-6 sm:py-3"
+          style={{
+            borderTop: "1px solid oklch(0.627 0.265 303.9)",
+            borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+            borderRight: "4px solid oklch(0.627 0.265 303.9)",
+            borderBottom: "4px solid oklch(0.627 0.265 303.9)",
+            borderRadius: "0.75rem",
+            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1 -ml-4 sm:-ml-8">
               <img
                 src="/logo.png"
                 alt="BaúAcadêmico"
-                className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain flex-shrink-0"
+                className="w-20 h-20 sm:w-36 sm:h-36 lg:w-40 lg:h-40 object-contain"
               />
-              <div className="min-w-0 flex-1 -ml-2 sm:-ml-1">
-                <h1 className="text-lg sm:text-xl font-bold truncate text-foreground">
+              <div className="min-w-0 flex-1 -ml-3 sm:-ml-4">
+                <h1 className="text-lg sm:text-2xl font-bold truncate">
                   BaúAcadêmico
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground truncate">
@@ -99,20 +123,38 @@ const Dashboard = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate("/admin")}
-                  className="border-primary/20 hover:bg-primary/5 text-primary text-xs sm:text-sm px-2 sm:px-3"
+                  className="border-primary/20 hover:bg-primary/5 text-primary hidden sm:flex"
                 >
-                  <Settings className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Admin</span>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Admin
+                </Button>
+              )}
+              {user?.is_admin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/admin")}
+                  className="border-primary/20 hover:bg-primary/5 text-primary sm:hidden p-2"
+                >
+                  <Settings className="w-4 h-4" />
                 </Button>
               )}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="border-destructive/20 hover:bg-destructive/5 text-destructive text-xs sm:text-sm px-2 sm:px-3"
+                className="border-destructive/20 hover:bg-destructive/5 text-destructive hidden sm:flex"
               >
-                <LogOut className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Sair</span>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="border-destructive/20 hover:bg-destructive/5 text-destructive sm:hidden p-2"
+              >
+                <LogOut className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -129,7 +171,7 @@ const Dashboard = () => {
         </div>
 
         {/* Menu Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
           {menuOptions.map((option) => {
             const Icon = option.icon;
             return (
@@ -142,24 +184,23 @@ const Dashboard = () => {
                   borderRight: "4px solid oklch(0.627 0.265 303.9)",
                   borderBottom: "4px solid oklch(0.627 0.265 303.9)",
                   borderRadius: "0.75rem",
-                  boxShadow:
-                    "0 6px 16px color-mix(in oklch, oklch(0.627 0.265 303.9), transparent 65%)",
+                  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
                 }}
                 onClick={() => navigate(option.path)}
               >
-                <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
+                <CardContent className="p-3 sm:p-6 text-center space-y-2 sm:space-y-4">
                   <div
-                    className={`mx-auto w-16 h-16 sm:w-20 sm:h-20 ${option.gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-2xl ring-1 ring-white/10 transition-all duration-300`}
+                    className={`mx-auto w-12 h-12 sm:w-20 sm:h-20 ${option.bgColor} ${option.hoverBg} rounded-2xl flex items-center justify-center transition-all duration-300 border border-white/20 shadow-sm group-hover:shadow-md group-hover:scale-105`}
                     role="img"
                     aria-hidden="true"
                   >
                     <Icon
-                      strokeWidth={1.8}
-                      className="w-10 h-10 sm:w-12 sm:h-12 text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
+                      strokeWidth={1.5}
+                      className={`w-6 h-6 sm:w-10 sm:h-10 ${option.color} ${option.hoverColor} transition-all duration-300`}
                     />
                   </div>
                   <div>
-                    <h3 className="font-bold text-base sm:text-lg mb-1">
+                    <h3 className="font-bold text-sm sm:text-lg mb-1">
                       {option.title}
                     </h3>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">

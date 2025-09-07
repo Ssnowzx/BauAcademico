@@ -2,68 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ProofChest - Design System with Cosmic Night Theme */
-
 @layer base {
   :root {
-    /* Futuristic Night Palette (BaúAcadêmico) */
-
-    /* Core */
-    --background: oklch(0.9399 0.0203 345.6985); /* approx from #0B0C10 */
+    --background: oklch(0.9399 0.0203 345.6985);
     --foreground: oklch(0.4712 0 0);
-
-    /* Surfaces */
-    --card: oklch(0.9498 0.0500 86.8891); /* dark metal surface */
+    --card: oklch(0.9498 0.05 86.8891);
     --card-foreground: oklch(0.4712 0 0);
-    --popover: oklch(1.0000 0 0);
+    --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.4712 0 0);
-
-    /* Accent colors */
-    --primary: oklch(0.6006 0.2425 293.8885); /* #29D6FF */
-    --primary-foreground: oklch(1.0000 0 0);
-    --secondary: oklch(0.8095 0.0694 198.1863); /* #00A3FF */
+    --primary: oklch(0.6006 0.2425 293.8885);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.8095 0.0694 198.1863);
     --secondary-foreground: oklch(0.3211 0 0);
-    --accent: oklch(0.9195 0.0801 87.6670); /* magenta #E500FF */
-    --accent-foreground: oklch(0.3211 0 0);
-
-    /* Muted / text */
-    --muted: oklch(0.8800 0.0504 212.0952);
+    --muted: oklch(0.88 0.0504 212.0952);
     --muted-foreground: oklch(0.5795 0 0);
-
+    --accent: oklch(0.9195 0.0801 87.667);
+    --accent-foreground: oklch(0.3211 0 0);
     --destructive: oklch(0.7091 0.1697 21.9551);
-    --destructive-foreground: oklch(1.0000 0 0);
-
-    /* Metals / structural */
-    --metal-dark: 230 7% 12%; /* #21232B */
-    --metal-light: 215 18% 73%; /* #A8B0C1 */
-
-    --border: oklch(0.6270 0.2650 303.9000);
+    --destructive-foreground: oklch(1 0 0);
+    --border: oklch(0.65 0.28 303.9);
     --input: oklch(0.9189 0 0);
-    --ring: oklch(0.7140 0.2030 305.5040);
-    --radius: 0.4rem;
-
-    /* Glows & effects */
-    --gradient-cosmic: linear-gradient(
-      90deg,
-      hsl(var(--primary) / 0.12),
-      hsl(var(--accent) / 0.08)
-    );
-    --gradient-subtle: linear-gradient(
-      180deg,
-      hsl(var(--background)),
-      hsl(var(--card))
-    );
-    --shadow-cosmic: 0 10px 30px -10px hsl(var(--primary) / 0.25);
-    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.18);
-    --chart-1: oklch(0.6270 0.2650 303.9000);
+    --ring: oklch(0.714 0.203 305.504);
+    --chart-1: oklch(0.627 0.265 303.9);
     --chart-2: oklch(0.8189 0.0799 212.0892);
-    --chart-3: oklch(0.9195 0.0801 87.6670);
-    --chart-4: oklch(0.5580 0.2880 302.3210);
-    --chart-5: oklch(0.3810 0.1760 304.9870);
-    --sidebar: oklch(0.9140 0.0424 343.0913);
+    --chart-3: oklch(0.9195 0.0801 87.667);
+    --chart-4: oklch(
+      0.78 0.12 302.321
+    ); /* softened purple for Provas/Trabalhos */
+    --chart-5: oklch(0.381 0.176 304.987);
+    --sidebar: oklch(0.914 0.0424 343.0913);
     --sidebar-foreground: oklch(0.3211 0 0);
     --sidebar-primary: oklch(0.6559 0.2118 354.3084);
-    --sidebar-primary-foreground: oklch(1.0000 0 0);
+    --sidebar-primary-foreground: oklch(1 0 0);
     --sidebar-accent: oklch(0.8228 0.1095 346.0184);
     --sidebar-accent-foreground: oklch(0.3211 0 0);
     --sidebar-border: oklch(0.9464 0.0327 307.1745);
@@ -71,327 +41,382 @@
     --font-sans: Poppins, sans-serif;
     --font-serif: Lora, serif;
     --font-mono: Fira Code, monospace;
-    --shadow-color: hsl(325.78 58.18% 56.86% / 0.5);
-    --shadow-opacity: 1.0;
-    --shadow-blur: 0px;
-    --shadow-spread: 0px;
-    --shadow-offset-x: 3px;
-    --shadow-offset-y: 3px;
-    --letter-spacing: 0em;
-    --spacing: 0.25rem;
-    --shadow-2xs: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 0.50);
-    --shadow-xs: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 0.50);
-    --shadow-sm: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 1px 2px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-    --shadow: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 1px 2px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-    --shadow-md: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 2px 4px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-    --shadow-lg: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 4px 6px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-    --shadow-xl: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 8px 10px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-    --shadow-2xl: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 2.50);
+    --radius: 0.4rem;
+    --shadow-2xs: 3px 3px 0px 0px
+      color-mix(in oklch, var(--border), transparent 50%);
+    --shadow-xs: 3px 3px 0px 0px
+      color-mix(in oklch, var(--border), transparent 50%);
+    --shadow-sm: 3px 3px 0px 0px var(--border), 3px 1px 2px -1px var(--border);
+    --shadow: 3px 3px 0px 0px var(--border), 3px 1px 2px -1px var(--border);
+    --shadow-md: 3px 3px 0px 0px var(--border), 3px 2px 4px -1px var(--border);
+    --shadow-lg: 3px 3px 0px 0px var(--border), 3px 4px 6px -1px var(--border);
+    --shadow-xl: 3px 3px 0px 0px var(--border), 3px 8px 10px -1px var(--border);
+    --shadow-2xl: 3px 3px 0px 0px
+      color-mix(in oklch, var(--border), transparent 60%);
     --tracking-normal: 0em;
-  }
-
-  .dark {
-    /* Explicit dark-mode overrides (same palette tuned) */
-    --background: oklch(0.2497 0.0305 234.1628);
-    --foreground: oklch(0.9306 0.0197 349.0785);
-    --card: oklch(0.2902 0.0299 233.5352);
-    --card-foreground: oklch(0.9306 0.0197 349.0785);
-    --primary: oklch(0.9195 0.0801 87.6670);
-    --accent: oklch(0.6699 0.0988 356.9762);
-    --muted: oklch(0.2713 0.0086 255.5780);
-    --border: oklch(0.3907 0.0399 242.2181);
-    --ring: oklch(0.6998 0.0896 201.8672);
-    --popover: oklch(0.2902 0.0299 233.5352);
-    --popover-foreground: oklch(0.9306 0.0197 349.0785);
-    --primary-foreground: oklch(0.2497 0.0305 234.1628);
-    --secondary: oklch(0.7794 0.0803 4.1330);
-    --secondary-foreground: oklch(0.2497 0.0305 234.1628);
-    --muted-foreground: oklch(0.7794 0.0803 4.1330);
-    --accent-foreground: oklch(0.9306 0.0197 349.0785);
-    --destructive: oklch(0.6702 0.1806 350.3599);
-    --destructive-foreground: oklch(0.2497 0.0305 234.1628);
-    --input: oklch(0.3093 0.0305 232.0027);
-    --chart-1: oklch(0.6998 0.0896 201.8672);
-    --chart-2: oklch(0.7794 0.0803 4.1330);
-    --chart-3: oklch(0.6699 0.0988 356.9762);
-    --chart-4: oklch(0.4408 0.0702 217.0848);
-    --chart-5: oklch(0.2713 0.0086 255.5780);
-    --radius: 0.4rem;
-    --sidebar: oklch(0.2303 0.0270 235.9743);
-    --sidebar-foreground: oklch(0.9670 0.0029 264.5419);
-    --sidebar-primary: oklch(0.6559 0.2118 354.3084);
-    --sidebar-primary-foreground: oklch(1.0000 0 0);
-    --sidebar-accent: oklch(0.8228 0.1095 346.0184);
-    --sidebar-accent-foreground: oklch(0.2781 0.0296 256.8480);
-    --sidebar-border: oklch(0.3729 0.0306 259.7328);
-    --sidebar-ring: oklch(0.6559 0.2118 354.3084);
-    --font-sans: Poppins, sans-serif;
-    --font-serif: Lora, serif;
-    --font-mono: Fira Code, monospace;
-    --shadow-color: #324859;
-    --shadow-opacity: 1.0;
-    --shadow-blur: 0px;
-    --shadow-spread: 0px;
-    --shadow-offset-x: 3px;
-    --shadow-offset-y: 3px;
-    --letter-spacing: 0em;
     --spacing: 0.25rem;
-    --shadow-2xs: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 0.50);
-    --shadow-xs: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 0.50);
-    --shadow-sm: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1.00), 3px 1px 2px -1px hsl(206.1538 28.0576% 27.2549% / 1.00);
-    --shadow: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1.00), 3px 1px 2px -1px hsl(206.1538 28.0576% 27.2549% / 1.00);
-    --shadow-md: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1.00), 3px 2px 4px -1px hsl(206.1538 28.0576% 27.2549% / 1.00);
-    --shadow-lg: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1.00), 3px 4px 6px -1px hsl(206.1538 28.0576% 27.2549% / 1.00);
-    --shadow-xl: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 1.00), 3px 8px 10px -1px hsl(206.1538 28.0576% 27.2549% / 1.00);
-    --shadow-2xl: 3px 3px 0px 0px hsl(206.1538 28.0576% 27.2549% / 2.50);
-  }
-  .theme {
-    --font-sans: Poppins, sans-serif;
-    --font-mono: Fira Code, monospace;
-    --font-serif: Lora, serif;
-    --radius: 0.4rem;
-    --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
-    --tracking-tight: calc(var(--tracking-normal) - 0.025em);
-    --tracking-wide: calc(var(--tracking-normal) + 0.025em);
-    --tracking-wider: calc(var(--tracking-normal) + 0.05em);
-    --tracking-widest: calc(var(--tracking-normal) + 0.1em);
-  }
-  body {
-    letter-spacing: var(--tracking-normal);
-  }
-}
 
-@layer base {
+    /* Enhanced gradient definitions with better visibility */
+    --gradient-cosmic: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      var(--secondary) 100%
+    );
+    --gradient-subtle: linear-gradient(
+      135deg,
+      var(--background) 0%,
+      var(--card) 100%
+    );
+    --shadow-cosmic: 0 20px 40px -12px color-mix(in oklch, var(--primary), transparent
+          75%);
+    --shadow-glow: 0 0 20px color-mix(in oklch, var(--primary), transparent 70%);
+    --vintage: #8b6d5c; /* cor vintage: tom sépia/marrom envelhecido */
+  }
+
+  /* Utility classes for semantic chart colors and gradients */
+  /* Background gradients referencing the CSS variables */
+  .bg-gradient-cosmic {
+    background-image: var(--gradient-cosmic);
+  }
+  .bg-gradient-subtle {
+    background-image: var(--gradient-subtle);
+  }
+
+  .bg-gradient-chart-1 {
+    background-image: linear-gradient(
+      135deg,
+      var(--chart-1) 0%,
+      var(--chart-2) 100%
+    );
+  }
+  .bg-gradient-chart-2 {
+    background-image: linear-gradient(
+      135deg,
+      var(--chart-2) 0%,
+      var(--chart-3) 100%
+    );
+  }
+  .bg-gradient-chart-3 {
+    background-image: linear-gradient(
+      135deg,
+      var(--chart-3) 0%,
+      var(--chart-4) 100%
+    );
+  }
+  .bg-gradient-chart-4 {
+    background-image: linear-gradient(
+      135deg,
+      var(--chart-4) 0%,
+      var(--chart-5) 100%
+    );
+  }
+  .bg-gradient-chart-5 {
+    background-image: linear-gradient(
+      135deg,
+      var(--chart-5) 0%,
+      var(--chart-1) 100%
+    );
+  }
+
+  /* Background / text / border helpers for charts */
+  .bg-chart-1 {
+    background-color: var(--chart-1);
+  }
+  .bg-chart-2 {
+    background-color: var(--chart-2);
+  }
+  .bg-chart-3 {
+    background-color: var(--chart-3);
+  }
+  .bg-chart-4 {
+    background-color: var(--chart-4);
+  }
+  .bg-chart-5 {
+    background-color: var(--chart-5);
+  }
+
+  .bg-chart-1-10 {
+    background-color: color-mix(in oklch, var(--chart-1), transparent 90%);
+  }
+  .bg-chart-2-10 {
+    background-color: color-mix(in oklch, var(--chart-2), transparent 90%);
+  }
+  .bg-chart-3-10 {
+    background-color: color-mix(in oklch, var(--chart-3), transparent 90%);
+  }
+  .bg-chart-4-10 {
+    background-color: color-mix(in oklch, var(--chart-4), transparent 90%);
+  }
+  .bg-chart-5-10 {
+    background-color: color-mix(in oklch, var(--chart-5), transparent 90%);
+  }
+
+  .text-chart-1 {
+    color: var(--chart-1);
+  }
+  .text-chart-2 {
+    color: var(--chart-2);
+  }
+  .text-chart-3 {
+    color: var(--chart-3);
+  }
+  .text-chart-4 {
+    color: var(--chart-4);
+  }
+  .text-chart-5 {
+    color: var(--chart-5);
+  }
+
+  .border-chart-1-30 {
+    border-color: color-mix(in oklch, var(--chart-1), transparent 70%);
+  }
+  .border-chart-2-30 {
+    border-color: color-mix(in oklch, var(--chart-2), transparent 70%);
+  }
+  .border-chart-3-30 {
+    border-color: color-mix(in oklch, var(--chart-3), transparent 70%);
+  }
+  .border-chart-4-30 {
+    border-color: color-mix(in oklch, var(--chart-4), transparent 70%);
+  }
+  .border-chart-5-30 {
+    border-color: color-mix(in oklch, var(--chart-5), transparent 70%);
+  }
+
+  /* Hover helpers (use escaped class names to match JSX like "hover:bg-chart-1-10") */
+  .hover\:bg-chart-1-10:hover {
+    background-color: color-mix(in oklch, var(--chart-1), transparent 90%);
+  }
+  .hover\:border-chart-1-50:hover {
+    border-color: color-mix(in oklch, var(--chart-1), transparent 50%);
+  }
+  .hover\:bg-chart-2-10:hover {
+    background-color: color-mix(in oklch, var(--chart-2), transparent 90%);
+  }
+  .hover\:border-chart-2-50:hover {
+    border-color: color-mix(in oklch, var(--chart-2), transparent 50%);
+  }
+  .hover\:bg-chart-3-10:hover {
+    background-color: color-mix(in oklch, var(--chart-3), transparent 90%);
+  }
+  .hover\:border-chart-3-50:hover {
+    border-color: color-mix(in oklch, var(--chart-3), transparent 50%);
+  }
+  .hover\:bg-chart-4-10:hover {
+    background-color: color-mix(in oklch, var(--chart-4), transparent 90%);
+  }
+  .hover\:border-chart-4-50:hover {
+    border-color: color-mix(in oklch, var(--chart-4), transparent 50%);
+  }
+  .hover\:bg-chart-5-10:hover {
+    background-color: color-mix(in oklch, var(--chart-5), transparent 90%);
+  }
+  .hover\:border-chart-5-50:hover {
+    border-color: color-mix(in oklch, var(--chart-5), transparent 50%);
+  }
+
+  /* Destructive (red) gradient helper */
+  .bg-gradient-destructive {
+    background-image: linear-gradient(
+      135deg,
+      var(--destructive) 0%,
+      var(--accent) 100%
+    );
+  }
+
+  .bg-destructive-10 {
+    background-color: color-mix(in oklch, var(--destructive), transparent 90%);
+  }
+  .text-destructive {
+    color: var(--destructive);
+  }
+  .border-destructive-30 {
+    border-color: color-mix(in oklch, var(--destructive), transparent 70%);
+  }
+  .hover\:bg-destructive-10:hover {
+    background-color: color-mix(in oklch, var(--destructive), transparent 90%);
+  }
+  .hover\:border-destructive-50:hover {
+    border-color: color-mix(in oklch, var(--destructive), transparent 50%);
+  }
+
+  @theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+
+    --font-sans: var(--font-sans);
+    --font-mono: var(--font-mono);
+    --font-serif: var(--font-serif);
+
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+
+    --shadow-2xs: var(--shadow-2xs);
+    --shadow-xs: var(--shadow-xs);
+    --shadow-sm: var(--shadow-sm);
+    --shadow: var(--shadow);
+    --shadow-md: var(--shadow-md);
+    --shadow-lg: var(--shadow-lg);
+    --shadow-xl: var(--shadow-xl);
+    --shadow-2xl: var(--shadow-2xl);
+  }
+
+  /* Base styles */
   * {
     @apply border-border;
   }
 
+  html,
+  body,
+  #root {
+    background-image: var(--gradient-subtle) !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+  }
+
   body {
-    @apply bg-background text-foreground;
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    @apply text-foreground;
+    font-family: var(--font-sans), Inter, system-ui, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: light;
     font-synthesis: none;
+    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
   }
 
-  /* Brand utilities */
-  .app-header {
-    background: var(--gradient-cosmic);
-    border-bottom: 1px solid hsl(var(--border));
-    box-shadow: var(--shadow-glow);
-    backdrop-filter: blur(6px);
+  /* Ensure page containers inherit the background */
+  .min-h-screen,
+  .bg-gradient-subtle {
+    background-image: var(--gradient-subtle) !important;
+    background-attachment: fixed !important;
   }
 
-  .brand-logo {
-    width: 72px;
-    height: 72px;
-    background-image: url("/logo.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    display: inline-block;
+  /* Ícones: sem fundo, sem borda, sem sombra — evitar contraste amarelo indesejado */
+  .icon-solid,
+  .icon,
+  .icon-wrapper,
+  .icon-button,
+  .btn-icon,
+  .icon-vintage,
+  .icon-yellow,
+  .lucide {
+    background: transparent !important;
+    background-image: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: inherit !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 !important;
   }
 
-  /* Large image logo without background box */
-  .brand-image {
-    display: block;
-    width: 180px;
-    height: auto;
-    max-width: 70%;
-    object-fit: contain;
-    filter: none;
-    -webkit-filter: none;
+  /* Forçar SVGs a seguir a cor atual (sem preenchimento automático de fundo) */
+  .icon svg,
+  .icon-wrapper svg,
+  .btn-icon svg,
+  .lucide,
+  .icon-vintage svg,
+  .icon-yellow svg {
+    background: transparent !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    color: inherit !important;
   }
 
-  /* Smaller variant for forms */
-  .brand-image-sm {
-    display: block;
-    width: 88px;
-    height: auto;
-    object-fit: contain;
-  }
-
-  /* Primary CTA button style for high contrast on dark background */
-  .btn-cta {
-    background: linear-gradient(90deg, #29d6ff 0%, #e500ff 100%);
-    color: white !important;
-    box-shadow: 0 8px 30px -12px rgba(41, 214, 255, 0.32),
-      0 2px 12px rgba(229, 0, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-  }
-
-  /* Hero / index specific */
-  .hero-container {
+  /* Logo (Dashboard-only) - aumenta visualmente sem afetar a altura do cabeçalho */
+  .logo-wrapper {
+    width: 56px; /* aumentar levemente no mobile para melhor legibilidade */
+    height: 56px;
     position: relative;
-    display: flex;
-    align-items: center; /* center vertically */
-    justify-content: center;
-    flex-direction: column;
-    gap: 28px;
-    padding-top: 40px;
-    padding-bottom: 40px;
-  }
-
-  .hero-title-back {
-    font-size: 88px;
-    line-height: 0.9;
-    font-weight: 800;
-    letter-spacing: -1px;
-    color: rgba(
-      107,
-      91,
-      149,
-      0.16
-    ); /* slightly more visible but still subtle */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -46%);
-    z-index: 0;
-    pointer-events: none;
-    user-select: none;
-    text-transform: none;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 20; /* ensure content sits above background title */
+    overflow: visible; /* permite o scale ultrapassar o container */
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    gap: 18px;
-    text-align: center;
-    max-width: 720px;
-    padding: 48px 20px;
   }
 
-  .hero-tagline {
-    font-size: 20px;
-    color: hsl(var(--muted-foreground));
-    max-width: 680px;
-    line-height: 1.6;
-  }
-
-  .cta-pill {
-    border-radius: 9999px;
-    padding: 14px 36px;
-    font-weight: 600;
-    font-size: 18px;
-    display: inline-block;
-  }
-
-  @media (max-width: 640px) {
-    .hero-title-back {
-      font-size: 40px;
-      top: 45%;
-      transform: translate(-50%, -50%);
-    }
-
-    .brand-image {
-      width: 150px;
-    }
-
-    .hero-tagline {
-      font-size: 16px;
-    }
-  }
-
-  .glow-accent {
-    /* keep the more subtle outer glow for containers */
-    box-shadow: 0 6px 24px -8px hsl(var(--primary) / 0.4);
-  }
-
-  /* Use a targeted utility class for white-field inputs to avoid affecting global buttons */
-  .light-field input,
-  .light-field textarea,
-  .light-field select,
-  .light-field .input,
-  .light-field .form-input,
-  .light-field .form-control,
-  .light-field .file-input,
-  .light-field .select {
-    color: hsl(
-      0 0% 6%
-    ) !important; /* near-black for maximum contrast on white/light backgrounds */
-  }
-
-  .light-field input::placeholder,
-  .light-field textarea::placeholder,
-  .light-field select::placeholder {
-    color: rgba(
-      0,
-      0,
-      0,
-      0.45
-    ) !important; /* darker placeholder for readability on white */
-  }
-
-  /* Keep default button/text color for buttons (on dark surfaces) */
-  button,
-  .btn,
-  .btn-cta,
-  .button,
-  .btn-outline,
-  .btn-ghost,
-  .brand-button,
-  .app-header button,
-  .nav .btn {
-    color: hsl(var(--foreground)) !important;
-  }
-
-  /* Ensure controls styled with explicit white backgrounds still use dark text */
-  .form-card .input,
-  .form-card input,
-  .form-card textarea {
-    color: hsl(0 0% 6%) !important;
-  }
-
-  /* Buttons inside light-field containers should remain white unless explicitly styled */
-  .light-field button,
-  .light-field .btn,
-  .light-field .button {
-    color: inherit !important; /* don't force dark on buttons inside this utility; inherit allows explicit button styles to apply */
-  }
-
-  /* Avisos image styling */
-  .aviso-image-wrapper {
-    display: block;
+  .logo-img {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    max-height: 60vh;
-    overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.04);
-    border-radius: 0.5rem;
-  }
-
-  .aviso-image-wrapper img {
-    width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: contain;
-    display: block;
-    margin: 0 auto;
+    transform-origin: center center;
+    /* Mobile: reduzir o translate para alinhar com o texto e aumentar escala um pouco */
+    transform: translateY(-2px) scale(1.5);
+    transition: transform 160ms ease-in-out;
   }
 
-  /* Text truncation utilities */
-  .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+  /* escalas responsivas para diferentes breakpoints (mantém proporção para web) */
+  @media (min-width: 640px) {
+    .logo-wrapper {
+      width: 64px;
+      height: 64px;
+    }
+    .logo-img {
+      transform: translateY(-4px) scale(1.45);
+    }
+  }
+  @media (min-width: 768px) {
+    .logo-wrapper {
+      width: 72px;
+      height: 72px;
+    }
+    .logo-img {
+      transform: translateY(-2px) scale(1.55);
+    }
+  }
+  @media (min-width: 1024px) {
+    .logo-wrapper {
+      width: 80px;
+      height: 80px;
+    }
+    .logo-img {
+      transform: translateY(0) scale(1.65);
+    }
   }
 
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-
-  .line-clamp-3 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
+  /* acessibilidade: garantir descrição mesmo se imagem for decorativa */
+  .logo-img[alt=""] {
+    aria-hidden: true;
   }
 }

@@ -106,6 +106,47 @@ export type Database = {
           }
         ];
       };
+      provas: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          materia: string | null;
+          nota: number | null;
+          tipo: string | null;
+          image_url: string | null;
+          observacao: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          materia?: string | null;
+          nota?: number | null;
+          tipo?: string | null;
+          image_url?: string | null;
+          observacao?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          materia?: string | null;
+          nota?: number | null;
+          tipo?: string | null;
+          image_url?: string | null;
+          observacao?: string | null;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "provas_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       hours_log: {
         Row: {
           category: string;

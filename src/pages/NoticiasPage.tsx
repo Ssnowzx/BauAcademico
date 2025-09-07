@@ -12,7 +12,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Newspaper, Plus, Eye } from "lucide-react";
+import { Calendar, Newspaper, Plus, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateTime } from "@/lib/date-utils";
 import { useAuth } from "@/contexts/useAuth";
@@ -333,27 +333,54 @@ const NoticiasPage = () => {
         </div>
       )}
 
-      {/* Header */}
-      <PageHeader
-        title="Notícias"
-        description="Últimas notícias do BaúAcadêmico"
-        icon={Newspaper}
-        rightAction={
-          user?.is_admin ? (
-            <Button
-              onClick={() => navigate("/admin/noticias")}
-              variant="outline"
-              className="border-cyan-500/30 text-cyan-500 hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all duration-200 text-xs sm:text-sm px-2 sm:px-4"
-            >
-              <Plus className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Gerenciar</span>
-            </Button>
-          ) : undefined
-        }
-      />
+      {/* Header - Rounded and Suspended */}
+      <div className="mx-2 mt-2 mb-6">
+        <div
+          className="bg-card shadow-lg px-3 py-2 sm:px-6 sm:py-3"
+          style={{
+            borderTop: "1px solid oklch(0.627 0.265 303.9)",
+            borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+            borderRight: "4px solid oklch(0.627 0.265 303.9)",
+            borderBottom: "4px solid oklch(0.627 0.265 303.9)",
+            borderRadius: "0.75rem",
+            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+          }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/dashboard")}
+                className="border-primary/20 hover:bg-primary/5 text-primary"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+              <Newspaper className="w-6 h-6 text-primary" />
+              <div>
+                <h1 className="text-lg font-bold">Notícias</h1>
+                <p className="text-xs text-muted-foreground">
+                  Últimas notícias do BaúAcadêmico
+                </p>
+              </div>
+            </div>
+            {user?.is_admin && (
+              <Button
+                onClick={() => navigate("/admin/noticias")}
+                variant="outline"
+                className="border-cyan-500/30 text-cyan-500 hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all duration-200"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Gerenciar
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-4xl">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <LoadingSpinner size="lg" />
@@ -371,13 +398,12 @@ const NoticiasPage = () => {
                 key={n.id}
                 className="group hover:shadow-cosmic transition-shadow duration-300 cursor-pointer"
                 style={{
-                  borderTop: "1px solid oklch(0.65 0.28 303.9)",
-                  borderLeft: "1px solid oklch(0.65 0.28 303.9)",
-                  borderRight: "6px solid oklch(0.65 0.28 303.9)",
-                  borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+                  borderTop: "1px solid oklch(0.627 0.265 303.9)",
+                  borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+                  borderRight: "4px solid oklch(0.627 0.265 303.9)",
+                  borderBottom: "4px solid oklch(0.627 0.265 303.9)",
                   borderRadius: "0.75rem",
-                  boxShadow:
-                    "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+                  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
                 }}
                 onClick={() => setSelectedNoticia(n)}
               >

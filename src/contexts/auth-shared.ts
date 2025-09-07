@@ -25,6 +25,3 @@ export interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
 );
-
-export const DEV_ADMIN_ID = "00000000-0000-0000-0000-000000000001";
-export const DEV_ADMIN_EMAIL = `${DEV_ADMIN_ID}@proofchest.local`;

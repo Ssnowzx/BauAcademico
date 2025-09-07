@@ -305,58 +305,56 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div className="border-b bg-card shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* Left side - Logo and title */}
-            <div className="flex items-center space-x-3">
-              <img
-                src="/logoinicio.png"
-                alt="BaúAcadêmico"
-                className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-full ring-1 ring-white/6 flex-shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-                  Painel Administrativo
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
+      {/* Header - Rounded and Suspended */}
+      <div className="mx-2 mt-2 mb-6">
+        <div
+          className="bg-card shadow-lg px-3 py-2 sm:px-6 sm:py-3"
+          style={{
+            borderTop: "1px solid oklch(0.627 0.265 303.9)",
+            borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+            borderRight: "4px solid oklch(0.627 0.265 303.9)",
+            borderBottom: "4px solid oklch(0.627 0.265 303.9)",
+            borderRadius: "0.75rem",
+            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+          }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/dashboard")}
+                className="border-primary/20 hover:bg-primary/5 text-primary"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+              <Settings className="w-6 h-6 text-primary" />
+              <div>
+                <h1 className="text-lg font-bold">Painel Administrativo</h1>
+                <p className="text-xs text-muted-foreground">
                   Gerenciar avisos do sistema
                 </p>
               </div>
-            </div>
-
-            {/* Right side - Actions */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/dashboard")}
-                className="text-xs sm:text-sm"
-              >
-                <ArrowLeft className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Voltar</span>
-              </Button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-4xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form Section */}
           <div>
             <Card
-              className="shadow-lg shadow-cosmic/20"
+              className="shadow-lg"
               style={{
-                borderTop: "1px solid oklch(0.65 0.28 303.9)",
-                borderLeft: "1px solid oklch(0.65 0.28 303.9)",
-                borderRight: "6px solid oklch(0.65 0.28 303.9)",
-                borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+                borderTop: "1px solid oklch(0.627 0.265 303.9)",
+                borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+                borderRight: "4px solid oklch(0.627 0.265 303.9)",
+                borderBottom: "4px solid oklch(0.627 0.265 303.9)",
                 borderRadius: "0.75rem",
-                boxShadow:
-                  "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+                boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
               }}
             >
               <CardHeader>
@@ -640,15 +638,14 @@ const AdminPage = () => {
           {/* Avisos List */}
           <div>
             <Card
-              className="shadow-lg shadow-cosmic/20"
+              className="shadow-lg"
               style={{
-                borderTop: "1px solid oklch(0.65 0.28 303.9)",
-                borderLeft: "1px solid oklch(0.65 0.28 303.9)",
-                borderRight: "6px solid oklch(0.65 0.28 303.9)",
-                borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+                borderTop: "1px solid oklch(0.627 0.265 303.9)",
+                borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+                borderRight: "4px solid oklch(0.627 0.265 303.9)",
+                borderBottom: "4px solid oklch(0.627 0.265 303.9)",
                 borderRadius: "0.75rem",
-                boxShadow:
-                  "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+                boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
               }}
             >
               <CardHeader>

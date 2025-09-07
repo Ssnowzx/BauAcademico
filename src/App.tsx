@@ -13,33 +13,30 @@ import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 import NoticiasPage from "./pages/NoticiasPage";
 import AdminNoticiasPage from "./pages/AdminNoticiasPage";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/documents/:category" element={<DocumentsPage />} />
-              <Route path="/avisos" element={<AvisosPage />} />
-              <Route path="/noticias" element={<NoticiasPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/admin/noticias" element={<AdminNoticiasPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/documents/:category" element={<DocumentsPage />} />
+            <Route path="/avisos" element={<AvisosPage />} />
+            <Route path="/noticias" element={<NoticiasPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/noticias" element={<AdminNoticiasPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

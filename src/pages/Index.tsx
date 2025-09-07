@@ -25,7 +25,7 @@ const Index = () => {
           <img
             src="/logo.png"
             alt="BaúAcadêmico"
-            className="w-96 h-96 sm:w-72 sm:h-72 max-w-full object-contain block -mb-8 sm:-mb-12 md:-mb-16"
+            className="w-48 h-48 md:w-[420px] md:h-[420px] lg:w-[520px] lg:h-[520px] max-w-full object-contain block -mb-6 md:-mb-12 lg:-mb-16"
           />
         </div>
 

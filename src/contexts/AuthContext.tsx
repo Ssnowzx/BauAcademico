@@ -11,10 +11,6 @@ import { toast } from "sonner";
 
 import { AuthContext, User } from "./auth-shared";
 
-// Constants reused across the provider
-const DEV_ADMIN_ID = "00000000-0000-0000-0000-000000000001"; // fixed dev admin id
-const DEV_ADMIN_EMAIL = `${DEV_ADMIN_ID}@proofchest.local`;
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -35,32 +31,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.removeItem("app_user");
     } catch (e) {
       /* ignore */
-    }
-  }, []);
-
-  // Helper: ensure a Supabase auth account exists for admin only
-  const ensureAdminAuthAccount = useCallback(async () => {
-    try {
-      // Try sign in first
-      const signInResult = await supabase.auth.signInWithPassword({
-        email: DEV_ADMIN_EMAIL,
-        password: DEV_ADMIN_ID,
-      });
-
-      // If sign in failed because account does not exist, attempt signup
-      if (signInResult.error) {
-        try {
-          await supabase.auth.signUp({
-            email: DEV_ADMIN_EMAIL,
-            password: DEV_ADMIN_ID,
-            options: { data: { user_id: DEV_ADMIN_ID } },
-          });
-        } catch (e) {
-          console.warn("Admin auth signup warning:", e);
-        }
-      }
-    } catch (e) {
-      console.warn("ensureAdminAuthAccount failed:", e);
     }
   }, []);
 
@@ -120,11 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           const persistedUser = JSON.parse(raw) as User;
           setUser(persistedUser);
 
-          // Se for admin, garantir auth account existe
-          if (persistedUser.username === "admin") {
-            await ensureAdminAuthAccount();
-          }
-
+          // Se for admin, não há mais necessidade de auth account especial
           return;
         } catch (e) {
           console.warn("Failed to parse app_user from localStorage", e);
@@ -139,11 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             const devUser = JSON.parse(devRaw) as User;
             setUser(devUser);
 
-            // If the dev user is admin, ensure an auth account exists so auth.uid() works
-            if (devUser.username === "admin") {
-              await ensureAdminAuthAccount();
-            }
-
+            // Se o dev user é admin, não há mais necessidade de auth account especial
             return;
           } catch (e) {
             console.warn("Failed to parse dev_user from localStorage", e);
@@ -155,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  }, [ensureAdminAuthAccount]);
+  }, []);
 
   useEffect(() => {
     void checkUser();
@@ -166,29 +128,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     async (username: string, password: string): Promise<boolean> => {
       setLoading(true);
       try {
-        // DEV quick shortcut: accept admin/admin or admin/admin123 locally
-        if (
-          import.meta.env.DEV &&
-          username === "admin" &&
-          (password === "admin" || password === "admin123")
-        ) {
-          const devUser: User = {
-            id: DEV_ADMIN_ID,
-            username: "admin",
-            is_admin: true,
-          };
-          setUser(devUser);
-
-          try {
-            persistUser(devUser);
-            await ensureAdminAuthAccount();
-          } catch (e) {
-            console.warn("Could not persist dev_user or auth", e);
-          }
-
-          toast.success("Login de desenvolvimento realizado");
-          return true;
-        }
+        // Fallback de desenvolvimento removido por segurança
+        // Agora apenas login via banco de dados é permitido
 
         // Normal flow: fetch user by username
         const { data: userData, error: userError } = await supabase
@@ -218,10 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // Para manter consistência, usar o ID real do usuário para auth
         const authUserId = userData.id;
 
-        // Para admin, garantir conta Auth existe (para auth.uid() funcionar)
-        if (userData.username === "admin") {
-          await ensureAdminAuthAccount();
-        }
+        // Para admin, não há mais necessidade de conta Auth especial
 
         setUser({
           id: authUserId,
@@ -241,30 +179,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } catch (error) {
         console.error("Login error:", error);
 
-        // DEV fallback in case users table isn't reachable (e.g. PostgREST 406)
-        if (import.meta.env.DEV) {
-          const devUser: User = {
-            id: `dev-${username}-${Date.now()}`,
-            username,
-            is_admin: false,
-          };
-          setUser(devUser);
-          try {
-            persistUser(devUser);
-          } catch (e) {
-            console.warn("Could not persist dev_user", e);
-          }
-          toast("Login de desenvolvimento habilitado devido a erro no backend");
-          return true;
-        }
-
-        toast.error("Erro ao fazer login");
+        // Fallback de desenvolvimento removido por segurança
+        // Agora apenas login via banco de dados é permitido
+        toast.error("Erro ao fazer login - verifique suas credenciais");
         return false;
       } finally {
         setLoading(false);
       }
     },
-    [ensureAdminAuthAccount, persistUser]
+    [persistUser]
   );
 
   // Sign up new user
