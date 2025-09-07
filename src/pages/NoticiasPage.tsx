@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Newspaper, Plus, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateTime } from "@/lib/date-utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/useAuth";
 
 interface Noticia {
   id: string;

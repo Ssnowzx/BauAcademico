@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/useAuth";
 import { ArrowLeft, Plus, Trash2, Edit, Newspaper } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateTimeShort } from "@/lib/date-utils";

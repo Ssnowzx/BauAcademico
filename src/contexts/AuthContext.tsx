@@ -366,4 +366,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Note: `useAuth` hook moved to a separate module (`useAuth.ts`) to avoid exporting non-component values
+// Note: the `useAuth` hook is provided from `./useAuth` module. Do not re-export
+// it from this file to keep this module exporting only components (Fast Refresh
+// compatibility). Import `useAuth` from `@/contexts/useAuth` where needed.
