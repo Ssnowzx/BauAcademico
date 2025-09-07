@@ -4,7 +4,9 @@ Sistema completo de gestão de comprovantes acadêmicos e notícias desenvolvido
 
 ## Resumo
 
-- **Sistema completamente refatorado e funcional** - Visual moderno, responsivo e otimizado
+- **Sistema completamente migrado para paleta Oklch** - Visual moderno com cores vibrantes conforme especificação
+- **Bordas customizadas dos cards funcionando** - Roxo vibrante com espessuras assimétricas (1px + 6px)
+- **Tema escuro completamente removido** - Sistema otimizado para tema claro apenas
 - Upload e gestão de documentos acadêmicos com categorização inteligente
 - **Sistema completo de avisos e notícias** - Upload de imagens e **múltiplos arquivos** (PDF, DOC, TXT)
 - **Sistema de download de múltiplos arquivos** - Usuários podem baixar qualquer arquivo anexado aos avisos
@@ -60,8 +62,12 @@ Sistema completo de gestão de comprovantes acadêmicos e notícias desenvolvido
 
 ## Status do Projeto
 
-✅ **PROJETO 100% FUNCIONAL E OTIMIZADO v2.3**
+✅ **PROJETO 100% FUNCIONAL E OTIMIZADO v2.5**
 
+- **🆕 MIGRAÇÃO COMPLETA PARA OKLCH** - Paleta de cores moderna e vibrante implementada
+- **🆕 BORDAS CUSTOMIZADAS FUNCIONANDO** - Cards com bordas roxas: 1px (topo/esquerda) + 6px (direita/baixo)
+- **🆕 TEMA ESCURO REMOVIDO** - Sistema otimizado apenas para tema claro
+- **🆕 CSS LIMPO E INLINE** - Bordas aplicadas via estilos inline para máxima compatibilidade
 - **🆕 Múltiplos arquivos funcionando** - Selecione e anexe quantos arquivos quiser por aviso
 - **🆕 Interface de drag & drop** - Arraste múltiplos arquivos diretamente para a área
 - **🆕 Preview e gerenciamento** - Visualize arquivos selecionados, remova individualmente
@@ -360,7 +366,9 @@ npm run lint      # Linting com ESLint
 
 ### Visual e UX
 
-- ✅ Design futurista com paleta azul/roxo
+- ✅ **Design com paleta Oklch vibrante** - Cores modernas e acessíveis
+- ✅ **Bordas customizadas dos cards** - Estilo assimétrico roxo (1px + 6px)
+- ✅ **Tema claro otimizado** - Sistema simplificado sem dark mode
 - ✅ Interface totalmente responsiva
 - ✅ Headers adaptáveis (mobile/tablet/desktop)
 - ✅ Botões e inputs com contraste adequado
@@ -368,6 +376,9 @@ npm run lint      # Linting com ESLint
 
 ### Código e Arquitetura
 
+- ✅ **Paleta Oklch implementada** - Cores vibrantes em produção
+- ✅ **Bordas via estilos inline** - Solução testada e funcional
+- ✅ **CSS limpo e otimizado** - Tema escuro completamente removido
 - ✅ Código limpo - removidos 34+ componentes não utilizados
 - ✅ Arquivos temporários e de debug removidos
 - ✅ Sistema de fallbacks robusto
@@ -461,7 +472,29 @@ VITE_SUPABASE_ANON_KEY=sua_chave_publica_aqui
 
 ## Histórico de Mudanças
 
-### v2.3.0 (Atual) - Múltiplos Arquivos Avançados
+### v2.5.0 (Atual) - Migração Completa para Paleta Oklch e Bordas Customizadas
+
+- ✅ **🆕 MIGRAÇÃO COMPLETA PARA PALETA OKLCH** - Todas as cores agora usam exclusivamente a paleta Oklch fornecida
+- ✅ **🆕 TEMA ESCURO COMPLETAMENTE REMOVIDO** - Sistema usa apenas tema claro com cores Oklch
+- ✅ **🆕 BORDAS CUSTOMIZADAS DOS CARDS** - Bordas roxas vibrantes: 1px (topo/esquerda) + 6px (direita/baixo)
+- ✅ **🆕 ESTILOS INLINE PARA BORDAS** - Solução final usando estilos inline por compatibilidade com Tailwind
+- ✅ **🆕 CSS LIMPO E OTIMIZADO** - Removidas todas as tentativas de CSS que não funcionaram
+- ✅ **🆕 CORES OKLCH EM PRODUÇÃO** - Sistema visual fielmente implementado conforme paleta fornecida
+- ✅ **🆝 THEME CONTEXT SIMPLIFICADO** - Removido sistema de toggle dark/light
+- ✅ **🆕 COMPONENTES LIMPOS** - Removidos `theme-toggle.tsx` e outros arquivos não utilizados
+
+### v2.4.0 - Refatoração e Otimização
+
+- ✅ **🆕 Código refatorado e otimizado** - Removidas duplicações e código desnecessário
+- ✅ **🆕 CSS consolidado** - Bordas dos cards unificadas em uma única regra otimizada
+- ✅ **🆕 Utilitários de data centralizados** - Todas as páginas usam `/lib/date-utils.ts`
+- ✅ **🆕 Imports limpos** - Removidos imports duplicados de `date-fns` em todas as páginas
+- ✅ **🆕 Arquivos desnecessários removidos** - `theme-toggle.tsx` e `App.css` removidos
+- ✅ **🆕 Estilos inline removidos** - Bordas agora são aplicadas via CSS com maior especificidade
+- ✅ **🆕 Paleta Oklch aplicada** - Tema dark completamente removido, apenas tema claro
+- ✅ **🆕 Performance melhorada** - CSS mais limpo, menos repetições, builds mais rápidos
+
+### v2.3.0 - Múltiplos Arquivos Avançados
 
 - ✅ **🆕 Seleção múltipla de arquivos** - Selecione quantos PDFs, TXT, DOC, DOCX quiser de uma vez
 - ✅ **🆕 Interface drag & drop** - Arraste múltiplos arquivos diretamente para a área de upload
@@ -521,6 +554,136 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 ---
 
-**BaúAcadêmico v2.3** - Sistema completo com múltiplos arquivos avançados! 🚀📚
+**BaúAcadêmico v2.5** - Sistema completo com paleta Oklch e bordas customizadas! 🚀📚
 
-_Desenvolvido com React + TypeScript + Supabase | Interface drag & drop e seleção múltipla funcionando perfeitamente_
+_Desenvolvido com React + TypeScript + Supabase | Migração completa para tema claro com cores vibrantes e bordas assimétricas funcionando perfeitamente_
+
+## 📋 Checklist para Próximas IAs
+
+- [ ] **Bordas dos cards**: Manter estilos inline, não tentar CSS externo
+- [ ] **Paleta Oklch**: Usar apenas cores do `:root`, não adicionar outras
+- [ ] **Tema escuro**: NÃO reativar, sistema usa apenas tema claro
+- [ ] **Data utils**: Usar `/src/lib/date-utils.ts`, não importar `date-fns` diretamente
+- [ ] **CSS limpo**: Evitar duplicações, usar variáveis CSS
+- [ ] **TypeScript**: Manter tipagem completa, resolver erros de build
+- [ ] **Performance**: Build deve ficar ~165KB gzipped
+- [ ] **Compatibilidade**: Testar bordas em Chrome, Firefox, Safari
+
+## 🎨 Sistema de Tema e Cores (IMPORTANTE PARA DEVS)
+
+### Paleta Oklch Implementada
+
+O sistema usa **exclusivamente** a paleta Oklch fornecida em `/src/index.css`:
+
+```css
+:root {
+  --background: oklch(0.9399 0.0203 345.6985);
+  --foreground: oklch(0.4712 0 0);
+  --card: oklch(0.9498 0.05 86.8891);
+  --primary: oklch(0.6006 0.2425 293.8885);
+  --secondary: oklch(0.8095 0.0694 198.1863);
+  --border: oklch(0.65 0.28 303.9);
+  /* ... mais cores */
+}
+```
+
+### ⚠️ Bordas Customizadas dos Cards
+
+**ATENÇÃO:** As bordas dos cards são aplicadas via **estilos inline** nos componentes:
+
+- **Dashboard.tsx**: Cards com bordas roxas customizadas
+- **AdminPage.tsx**: Cards com bordas roxas customizadas
+
+```tsx
+// Exemplo de implementação das bordas
+<Card
+  style={{
+    borderTop: '1px solid oklch(0.65 0.28 303.9)',
+    borderLeft: '1px solid oklch(0.65 0.28 303.9)',
+    borderRight: '6px solid oklch(0.65 0.28 303.9)',
+    borderBottom: '6px solid oklch(0.65 0.28 303.9)',
+    borderRadius: '0.75rem',
+    boxShadow: '0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)'
+  }}
+>
+```
+
+**Por que estilos inline?**
+
+- CSS externo era sobrescrito pelo Tailwind
+- Especificidade máxima garantida
+- Solução testada e funcional
+
+### 🚫 Tema Escuro Removido
+
+- **ThemeContext**: Simplificado, sem toggle dark/light
+- **CSS**: Todas as classes `.dark` foram removidas
+- **Componentes**: `theme-toggle.tsx` foi deletado
+- **Tailwind**: `darkMode` removido do config
+
+### 📁 Arquivos de Tema
+
+- **`/src/index.css`**: Contém toda a paleta Oklch e estilos base
+- **`/src/contexts/ThemeContext.tsx`**: Context simplificado sem dark mode
+- **`/tailwind.config.ts`**: Configuração sem darkMode
+- **`/src/App.tsx`**: Sem botão de toggle de tema
+
+## 🔧 Guia para Desenvolvedores
+
+### Estrutura de Arquivos Importantes
+
+```
+src/
+├── index.css                 # 🎨 PALETA OKLCH + Estilos base
+├── contexts/
+│   └── ThemeContext.tsx      # Context simplificado (sem dark mode)
+├── pages/
+│   ├── Dashboard.tsx         # 🔲 Cards com bordas inline
+│   └── AdminPage.tsx         # 🔲 Cards com bordas inline
+├── components/ui/
+│   └── card.tsx             # Componente base dos cards
+└── lib/
+    └── date-utils.ts        # Utilitários de data centralizados
+```
+
+### ⚠️ Notas Importantes para Modificações
+
+1. **Bordas dos Cards**:
+
+   - NÃO remover estilos inline dos cards
+   - CSS externo não funciona devido ao Tailwind
+   - Manter especificação: 1px (topo/esquerda) + 6px (direita/baixo)
+
+2. **Cores**:
+
+   - Usar APENAS valores Oklch do `:root`
+   - NÃO adicionar tema escuro
+   - NÃO modificar paleta sem consenso
+
+3. **CSS**:
+
+   - `/src/index.css` é o arquivo principal
+   - Evitar duplicação de regras
+   - Usar variáveis CSS quando possível
+
+4. **Data/Formatação**:
+   - Usar `/src/lib/date-utils.ts` para datas
+   - NÃO importar `date-fns` diretamente
+   - Função `formatarData()` padronizada
+
+### 🧪 Como Testar Bordas
+
+Se as bordas dos cards não aparecerem:
+
+1. ✅ Verificar estilos inline nos componentes
+2. ✅ Confirmar valores Oklch no navegador
+3. ✅ Testar em diferentes browsers
+4. ❌ NÃO tentar resolver via CSS externo
+
+### 📦 Dependências Principais
+
+- React 18 + TypeScript + Vite
+- Tailwind CSS (configurado sem darkMode)
+- Shadcn/ui + Radix UI
+- Supabase (Auth + Database + Storage)
+- Date-fns (centralizado em date-utils)

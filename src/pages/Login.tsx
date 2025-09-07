@@ -62,12 +62,7 @@ const Login = () => {
             />
           </div>
           <div>
-            <h1
-              className="text-3xl font-bold"
-              style={{ color: "hsl(var(--foreground))" }}
-            >
-              BaúAcadêmico
-            </h1>
+            <h1 className="text-3xl font-bold text-foreground">BaúAcadêmico</h1>
             <p className="text-muted-foreground">
               Gerencie seus comprovantes acadêmicos
             </p>
@@ -75,7 +70,18 @@ const Login = () => {
         </div>
 
         {/* Login / SignUp Form */}
-        <Card className="shadow-lg border-0 shadow-cosmic/20 bg-card">
+        <Card
+          className="shadow-lg shadow-cosmic/20 bg-card"
+          style={{
+            borderTop: "1px solid oklch(0.65 0.28 303.9)",
+            borderLeft: "1px solid oklch(0.65 0.28 303.9)",
+            borderRight: "6px solid oklch(0.65 0.28 303.9)",
+            borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+            borderRadius: "0.75rem",
+            boxShadow:
+              "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+          }}
+        >
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">
               {isSignUp ? "Criar Conta" : "Entrar"}
@@ -130,7 +136,16 @@ const Login = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-cosmic hover:shadow-glow transition-all duration-200 text-white"
+                className="w-full bg-gradient-cosmic hover:shadow-glow transition-all duration-300 text-white font-semibold"
+                style={{
+                  borderTop: "1px solid oklch(0.65 0.28 303.9)",
+                  borderLeft: "1px solid oklch(0.65 0.28 303.9)",
+                  borderRight: "6px solid oklch(0.65 0.28 303.9)",
+                  borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+                  borderRadius: "0.75rem",
+                  boxShadow:
+                    "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+                }}
                 disabled={
                   isLoading ||
                   !username ||

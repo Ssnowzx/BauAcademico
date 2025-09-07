@@ -82,7 +82,17 @@ const UploadPage = () => {
         toast.error("Erro ao extrair texto da imagem");
       }
 
-      const insertData: any = {
+      interface InsertUploadDocument {
+        user_id: string;
+        category: "APC" | "ACE" | "RECIBO";
+        image_url: string;
+        extracted_text: string;
+        evento?: string;
+        horas?: number;
+        observacao?: string;
+      }
+
+      const insertData: InsertUploadDocument = {
         user_id: user.id,
         category: formData.category,
         image_url: publicUrl,
@@ -165,7 +175,7 @@ const UploadPage = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Card className="shadow-lg border-0 shadow-cosmic/20">
+        <Card className="shadow-lg shadow-cosmic/20 border-vibrant">
           <CardHeader>
             <CardTitle className="flex items-center">
               <Camera className="w-5 h-5 mr-2" />
@@ -186,10 +196,10 @@ const UploadPage = () => {
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      category: e.target.value as any,
+                      category: e.target.value as "APC" | "ACE" | "RECIBO",
                     }))
                   }
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                  className="w-full px-3 py-2 border border-input rounded-md bg-card"
                   disabled={uploading}
                 >
                   <option value="APC">APC</option>

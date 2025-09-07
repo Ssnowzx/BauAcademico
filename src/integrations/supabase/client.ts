@@ -23,7 +23,7 @@ if (!ENV_SUPABASE_KEY) {
       "[supabase] VITE_SUPABASE_ANON_KEY must be set in production environment"
     );
   }
-  // eslint-disable-next-line no-console
+   
   console.warn(
     "[supabase] VITE_SUPABASE_ANON_KEY is not set. Set it in .env for local development."
   );

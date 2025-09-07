@@ -1,5 +1,4 @@
 import React, {
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -10,29 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import * as bcrypt from "bcryptjs";
 import { toast } from "sonner";
 
-interface User {
-  id: string;
-  username: string;
-  is_admin: boolean;
-}
-
-// Representação da linha/registro da tabela `users` no banco
-interface UserRow {
-  id: string;
-  username: string;
-  password: string;
-  is_admin: boolean;
-}
-
-interface AuthContextType {
-  user: User | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  loading: boolean;
-  signUp: (username: string, password: string) => Promise<boolean>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext, User } from "./auth-shared";
 
 // Constants reused across the provider
 const DEV_ADMIN_ID = "00000000-0000-0000-0000-000000000001"; // fixed dev admin id
@@ -389,10 +366,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+// Note: `useAuth` hook moved to a separate module (`useAuth.ts`) to avoid exporting non-component values

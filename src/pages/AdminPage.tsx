@@ -26,8 +26,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { formatDateTimeShort } from "@/lib/date-utils";
 
 interface FileData {
   url: string;
@@ -201,7 +200,7 @@ const AdminPage = () => {
 
       if (editingAviso) {
         // Update existing aviso
-        const updateData: any = {
+        const updateData: Partial<Aviso> & { files?: FileData[] } = {
           title: formData.title,
           description: formData.description,
         };
@@ -228,7 +227,9 @@ const AdminPage = () => {
         toast.success("Aviso atualizado com sucesso!");
       } else {
         // Create new aviso
-        const insertData: any = {
+        const insertData: Omit<Aviso, "id" | "created_at"> & {
+          files?: FileData[];
+        } = {
           title: formData.title,
           description: formData.description,
           image_url: imageUrl,
@@ -346,7 +347,18 @@ const AdminPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form Section */}
           <div>
-            <Card className="shadow-lg border-0 shadow-cosmic/20">
+            <Card
+              className="shadow-lg shadow-cosmic/20"
+              style={{
+                borderTop: "1px solid oklch(0.65 0.28 303.9)",
+                borderLeft: "1px solid oklch(0.65 0.28 303.9)",
+                borderRight: "6px solid oklch(0.65 0.28 303.9)",
+                borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+                borderRadius: "0.75rem",
+                boxShadow:
+                  "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+              }}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Plus className="w-5 h-5 mr-2" />
@@ -627,7 +639,18 @@ const AdminPage = () => {
 
           {/* Avisos List */}
           <div>
-            <Card className="shadow-lg border-0 shadow-cosmic/20">
+            <Card
+              className="shadow-lg shadow-cosmic/20"
+              style={{
+                borderTop: "1px solid oklch(0.65 0.28 303.9)",
+                borderLeft: "1px solid oklch(0.65 0.28 303.9)",
+                borderRight: "6px solid oklch(0.65 0.28 303.9)",
+                borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+                borderRadius: "0.75rem",
+                boxShadow:
+                  "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+              }}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center">
@@ -735,11 +758,7 @@ const AdminPage = () => {
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          {format(
-                            new Date(aviso.created_at),
-                            "dd/MM/yyyy 'às' HH:mm",
-                            { locale: ptBR }
-                          )}
+                          {formatDateTimeShort(aviso.created_at)}
                         </p>
                       </div>
                     ))}

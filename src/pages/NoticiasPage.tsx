@@ -14,8 +14,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Newspaper, Plus, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { formatDateTime } from "@/lib/date-utils";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Noticia {
@@ -41,69 +40,26 @@ const NoticiasPage = () => {
     new Map()
   );
 
+  // Refs to hold latest maps to avoid adding them to effect deps
+  const imageCacheRef = React.useRef(imageCache);
+  const imageLoadingStateRef = React.useRef(imageLoadingState);
+  const imageRetryCountRef = React.useRef(imageRetryCount);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    imageCacheRef.current = imageCache;
+  }, [imageCache]);
+  useEffect(() => {
+    imageLoadingStateRef.current = imageLoadingState;
+  }, [imageLoadingState]);
+  useEffect(() => {
+    imageRetryCountRef.current = imageRetryCount;
+  }, [imageRetryCount]);
+
   // Ref para manter as blob URLs ativas durante toda a vida do componente
   const blobUrlsRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadNoticias();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Função para pré-carregar imagens
-  const preloadImage = async (imageUrl: string) => {
-    if (
-      !imageUrl ||
-      imageLoadingState.get(imageUrl) === "loading" ||
-      imageLoadingState.get(imageUrl) === "loaded"
-    ) {
-      return;
-    }
-
-    setImageLoadingState((prev) => new Map(prev.set(imageUrl, "loading")));
-
-    try {
-      const cachedUrl = await getImageUrl(imageUrl);
-      if (cachedUrl) {
-        // Pré-carregar a imagem
-        const img = new Image();
-        img.onload = () => {
-          setImageLoadingState((prev) => new Map(prev.set(imageUrl, "loaded")));
-        };
-        img.onerror = () => {
-          console.error("Erro ao pré-carregar imagem:", cachedUrl);
-          setImageLoadingState((prev) => new Map(prev.set(imageUrl, "error")));
-        };
-        img.src = cachedUrl;
-      }
-    } catch (error) {
-      console.error("Erro no preloadImage:", error);
-      setImageLoadingState((prev) => new Map(prev.set(imageUrl, "error")));
-    }
-  };
-
-  // Pre-carregar imagens quando notícias são carregadas
-  useEffect(() => {
-    if (noticias.length > 0) {
-      noticias.forEach((noticia) => {
-        if (noticia.image_url && !imageCache.has(noticia.image_url)) {
-          preloadImage(noticia.image_url);
-        }
-      });
-    }
-  }, [noticias]);
-
-  // Cleanup: liberar blob URLs quando componente for desmontado
-  useEffect(() => {
-    return () => {
-      // Liberar todas as blob URLs criadas
-      blobUrlsRef.current.forEach((blobUrl) => {
-        URL.revokeObjectURL(blobUrl);
-      });
-      blobUrlsRef.current.clear();
-    };
-  }, []);
-
-  const loadNoticias = async () => {
+  const loadNoticias = React.useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -113,10 +69,11 @@ const NoticiasPage = () => {
 
       if (error) throw error;
       setNoticias(data || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error loading noticias:", err);
       // Supabase returns PGRST205 when the table is not present in the schema cache
-      if (err?.code === "PGRST205") {
+      const e = err as { code?: string } | undefined;
+      if (e?.code === "PGRST205") {
         setMissingTable(true);
         toast.error(
           "Tabela 'noticias' não encontrada no banco. Rode a migração."
@@ -127,118 +84,126 @@ const NoticiasPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Função para garantir URL de imagem funcional no Chrome
-  const getImageUrl = async (url: string | null): Promise<string | null> => {
-    if (!url) return null;
+  useEffect(() => {
+    void loadNoticias();
+  }, [loadNoticias]);
 
-    // Check cache first
-    if (imageCache.has(url)) {
-      const cachedUrl = imageCache.get(url);
-      // Verificar se a blob URL ainda é válida
-      if (
-        cachedUrl &&
-        cachedUrl.startsWith("blob:") &&
-        !blobUrlsRef.current.has(cachedUrl)
-      ) {
-        // Blob URL foi revogada, remover do cache
-        setImageCache((prev) => {
-          const newCache = new Map(prev);
-          newCache.delete(url);
-          return newCache;
+  // Função para garantir URL de imagem funcional no Chrome (declarada antes de preload)
+  const getImageUrl = React.useCallback(
+    async (url: string | null): Promise<string | null> => {
+      if (!url) return null;
+
+      // Check cache first
+      if (imageCacheRef.current.has(url)) {
+        const cachedUrl = imageCacheRef.current.get(url);
+        // Verificar se a blob URL ainda é válida
+        if (
+          cachedUrl &&
+          cachedUrl.startsWith("blob:") &&
+          !blobUrlsRef.current.has(cachedUrl)
+        ) {
+          // Blob URL foi revogada, remover do cache
+          setImageCache((prev) => {
+            const newCache = new Map(prev);
+            newCache.delete(url);
+            return newCache;
+          });
+        } else {
+          return cachedUrl || null;
+        }
+      }
+
+      try {
+        let finalUrl = url;
+
+        // Se não é uma URL completa, gera URL pública do Supabase
+        if (!url.startsWith("http") && !url.startsWith("data:")) {
+          const { data } = supabase.storage.from("noticias").getPublicUrl(url);
+          finalUrl = data.publicUrl;
+        }
+
+        // Verificar se é um formato suportado pelo Chrome
+        const isUnsupportedFormat =
+          finalUrl.toLowerCase().includes(".heic") ||
+          finalUrl.toLowerCase().includes(".heif");
+
+        if (isUnsupportedFormat) {
+          console.warn("Formato HEIC/HEIF não suportado pelo Chrome:", finalUrl);
+          // Para formatos não suportados, retornar a URL original e deixar o navegador decidir
+          setImageCache((prev) => new Map(prev.set(url, finalUrl)));
+          return finalUrl;
+        }
+
+        // Para Chrome: fazer fetch da imagem e converter para blob URL
+        const response = await fetch(finalUrl, {
+          mode: "cors",
+          credentials: "omit",
+          referrerPolicy: "no-referrer",
         });
-      } else {
-        return cachedUrl || null;
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        // Registrar a blob URL para posterior limpeza
+        blobUrlsRef.current.add(blobUrl);
+
+        // Cache the blob URL
+        setImageCache((prev) => new Map(prev.set(url, blobUrl)));
+
+        return blobUrl;
+      } catch (error) {
+        console.warn("Erro ao processar imagem, usando URL direta:", error);
+
+        // Fallback: retornar URL original
+        let fallbackUrl = url;
+        if (!url.startsWith("http") && !url.startsWith("data:")) {
+          const { data } = supabase.storage.from("noticias").getPublicUrl(url);
+          fallbackUrl = `${data.publicUrl}?t=${Date.now()}`;
+        }
+
+        setImageCache((prev) => new Map(prev.set(url, fallbackUrl)));
+        return fallbackUrl;
       }
-    }
-
-    try {
-      let finalUrl = url;
-
-      // Se não é uma URL completa, gera URL pública do Supabase
-      if (!url.startsWith("http") && !url.startsWith("data:")) {
-        const { data } = supabase.storage.from("noticias").getPublicUrl(url);
-        finalUrl = data.publicUrl;
-      }
-
-      // Verificar se é um formato suportado pelo Chrome
-      const isUnsupportedFormat =
-        finalUrl.toLowerCase().includes(".heic") ||
-        finalUrl.toLowerCase().includes(".heif");
-
-      if (isUnsupportedFormat) {
-        console.warn("Formato HEIC/HEIF não suportado pelo Chrome:", finalUrl);
-        // Para formatos não suportados, retornar a URL original e deixar o navegador decidir
-        setImageCache((prev) => new Map(prev.set(url, finalUrl)));
-        return finalUrl;
-      }
-
-      // Para Chrome: fazer fetch da imagem e converter para blob URL
-      const response = await fetch(finalUrl, {
-        mode: "cors",
-        credentials: "omit",
-        referrerPolicy: "no-referrer",
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      // Registrar a blob URL para posterior limpeza
-      blobUrlsRef.current.add(blobUrl);
-
-      // Cache the blob URL
-      setImageCache((prev) => new Map(prev.set(url, blobUrl)));
-
-      return blobUrl;
-    } catch (error) {
-      console.warn("Erro ao processar imagem, usando URL direta:", error);
-
-      // Fallback: retornar URL original
-      let fallbackUrl = url;
-      if (!url.startsWith("http") && !url.startsWith("data:")) {
-        const { data } = supabase.storage.from("noticias").getPublicUrl(url);
-        fallbackUrl = `${data.publicUrl}?t=${Date.now()}`;
-      }
-
-      setImageCache((prev) => new Map(prev.set(url, fallbackUrl)));
-      return fallbackUrl;
-    }
-  };
+    },
+    []
+  );
 
   // Função síncrona para uso imediato (com cache)
   const getImageUrlSync = (url: string | null): string | null => {
     if (!url) return null;
 
     // Se já está no cache, retorna
-    if (imageCache.has(url)) {
-      const cachedUrl = imageCache.get(url);
+    if (imageCacheRef.current.has(url)) {
+      const cachedUrl = imageCacheRef.current.get(url);
       // Verificar se a blob URL ainda é válida
       if (
         cachedUrl &&
         cachedUrl.startsWith("blob:") &&
         !blobUrlsRef.current.has(cachedUrl)
       ) {
-        // Blob URL foi revogada, remover do cache e tentar novamente
+        // Blob URL foi revogada, remover do cache e tentar recarregar assincronamente
         setImageCache((prev) => {
           const newCache = new Map(prev);
           newCache.delete(url);
           return newCache;
         });
-        getImageUrl(url); // Recarregar
-      } else {
-        return cachedUrl || null;
+        // Iniciar recarga assíncrona
+        void getImageUrl(url);
+        return null;
       }
+
+      return cachedUrl || null;
     }
 
-    // Se não está no cache, inicia o carregamento assíncrono
-    getImageUrl(url);
+    // Se não está no cache, inicia o carregamento assíncrono e retorna URL pública temporária
+    void getImageUrl(url);
 
-    // Retorna URL temporária enquanto carrega
     if (url.startsWith("http") || url.startsWith("data:")) {
       return url;
     } else {
@@ -246,6 +211,69 @@ const NoticiasPage = () => {
       return `${data.publicUrl}?t=${Date.now()}`;
     }
   };
+
+  // Função para pré-carregar imagens (memoized)
+  const preloadImage = React.useCallback(
+    async (imageUrl: string) => {
+      if (!imageUrl) return;
+
+      const currentState = imageLoadingStateRef.current.get(imageUrl);
+      if (currentState === "loading" || currentState === "loaded") return;
+
+      setImageLoadingState((prev) => new Map(prev.set(imageUrl, "loading")));
+
+      try {
+        const cachedUrl = await getImageUrl(imageUrl);
+        if (cachedUrl) {
+          // Pré-carregar a imagem
+          const img = new Image();
+          img.onload = () => {
+            setImageLoadingState((prev) => new Map(prev.set(imageUrl, "loaded")));
+          };
+          img.onerror = () => {
+            console.error("Erro ao pré-carregar imagem:", cachedUrl);
+            setImageLoadingState((prev) => new Map(prev.set(imageUrl, "error")));
+          };
+          img.src = cachedUrl;
+        }
+      } catch (error) {
+        console.error("Erro no preloadImage:", error);
+        setImageLoadingState((prev) => new Map(prev.set(imageUrl, "error")));
+      }
+    },
+    [getImageUrl]
+  );
+
+  // Pre-carregar imagens quando notícias são carregadas
+  useEffect(() => {
+    if (noticias.length > 0) {
+      noticias.forEach((noticia) => {
+        if (noticia.image_url && !imageCacheRef.current.has(noticia.image_url)) {
+          void preloadImage(noticia.image_url);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noticias]);
+
+  // Cleanup: liberar blob URLs quando componente for desmontado
+  useEffect(() => {
+    // Capture a stable reference to the underlying Set so the cleanup closure
+    // doesn't re-read `blobUrlsRef.current` (avoids ref mutation warnings).
+    const setRef = blobUrlsRef.current;
+    const urlsSnapshot = Array.from(setRef);
+    return () => {
+      urlsSnapshot.forEach((blobUrl) => {
+        try {
+          URL.revokeObjectURL(blobUrl);
+        } catch (e) {
+          // ignore
+        }
+      });
+      // Clear the snapshot Set instance we captured.
+      setRef.clear();
+    };
+  }, []);
 
   // Função para tentar novamente o carregamento de uma imagem
   const retryImage = async (imageUrl: string) => {
@@ -331,7 +359,16 @@ const NoticiasPage = () => {
             {noticias.map((n) => (
               <Card
                 key={n.id}
-                className="group hover:shadow-cosmic transition-all duration-300 cursor-pointer"
+                className="group hover:shadow-cosmic transition-shadow duration-300 cursor-pointer"
+                style={{
+                  borderTop: "1px solid oklch(0.65 0.28 303.9)",
+                  borderLeft: "1px solid oklch(0.65 0.28 303.9)",
+                  borderRight: "6px solid oklch(0.65 0.28 303.9)",
+                  borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+                  borderRadius: "0.75rem",
+                  boxShadow:
+                    "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+                }}
                 onClick={() => setSelectedNoticia(n)}
               >
                 {/* Image Preview */}
@@ -431,9 +468,7 @@ const NoticiasPage = () => {
                   </CardTitle>
                   <CardDescription className="flex items-center text-xs">
                     <Calendar className="w-3 h-3 mr-1" />
-                    {format(new Date(n.created_at), "dd/MM/yyyy", {
-                      locale: ptBR,
-                    })}
+                    {formatDateTime(n.created_at)}
                   </CardDescription>
                 </CardHeader>
 
@@ -464,11 +499,7 @@ const NoticiasPage = () => {
                   <h2 className="text-xl font-bold">{selectedNoticia.title}</h2>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4 mr-2" />
-                    {format(
-                      new Date(selectedNoticia.created_at),
-                      "dd 'de' MMMM 'de' yyyy 'às' HH:mm",
-                      { locale: ptBR }
-                    )}
+                    {formatDateTime(selectedNoticia.created_at)}
                   </div>
                 </div>
                 <Button

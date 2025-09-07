@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +21,7 @@ import {
   Check,
 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { formatDate } from "@/lib/date-utils";
 
 interface Document {
   id: string;
@@ -33,6 +32,18 @@ interface Document {
   horas?: number;
   data_evento?: string;
   created_at: string;
+}
+
+// Tipo usado para inserção no banco (forma esperada pelo Supabase)
+interface InsertDocument {
+  user_id: string;
+  category: string;
+  image_url: string;
+  extracted_text: string;
+  evento?: string;
+  horas?: number;
+  data_evento?: string;
+  observacao?: string;
 }
 
 const DocumentsPage = () => {
@@ -58,17 +69,17 @@ const DocumentsPage = () => {
     apc: {
       title: "APC",
       description: "Atividades Práticas Curriculares",
-      color: "bg-purple-500",
+      color: "bg-chart-1",
     },
     ace: {
       title: "ACE",
       description: "Atividades Complementares de Ensino",
-      color: "bg-blue-500",
+      color: "bg-chart-2",
     },
     recibos: {
       title: "RECIBOS",
       description: "Comprovantes de Mensalidade",
-      color: "bg-green-500",
+      color: "bg-chart-3",
     },
   };
 
@@ -95,9 +106,9 @@ const DocumentsPage = () => {
     if (user && category) {
       loadDocuments();
     }
-  }, [user, category]);
+  }, [user, category, loadDocuments]);
 
-  const loadDocuments = async () => {
+  const loadDocuments = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -106,27 +117,27 @@ const DocumentsPage = () => {
         console.log("DEV mode: loading documents from localStorage");
         const devDocs = JSON.parse(
           localStorage.getItem("dev_documents") || "[]"
-        );
+        ) as Array<Record<string, unknown>>;
         const categoryKey =
           category?.toLowerCase() === "recibo"
             ? "recibos"
             : category?.toLowerCase();
         const filtered = devDocs
           .filter(
-            (d: any) =>
-              (d.category || "").toLowerCase() ===
+            (d) =>
+              String(d.category || "").toLowerCase() ===
               (categoryKey || "").toLowerCase()
           )
-          .map((d: any) => ({
-            id: d.id,
-            category: d.category,
-            image_url: d.dataUrl || d.image_url,
-            extracted_text: d.extracted_text,
-            evento: d.evento,
-            horas: d.horas,
-            data_evento: d.data_evento,
-            created_at: d.created_at,
-          }));
+          .map((d) => ({
+            id: String(d.id),
+            category: String(d.category),
+            image_url: String(d.dataUrl || d.image_url),
+            extracted_text: String(d.extracted_text || ""),
+            evento: d.evento ? String(d.evento) : undefined,
+            horas: d.horas ? Number(d.horas) : undefined,
+            data_evento: d.data_evento ? String(d.data_evento) : undefined,
+            created_at: String(d.created_at || new Date().toISOString()),
+          })) as Document[];
         setDocuments(filtered.reverse());
         return;
       }
@@ -146,7 +157,7 @@ const DocumentsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, category]);
 
   const deleteDocument = async (docId: string) => {
     try {
@@ -154,8 +165,8 @@ const DocumentsPage = () => {
       if (import.meta.env.DEV && user?.id?.startsWith("dev")) {
         const devDocs = JSON.parse(
           localStorage.getItem("dev_documents") || "[]"
-        );
-        const remaining = devDocs.filter((d: any) => d.id !== docId);
+        ) as Array<Record<string, unknown>>;
+        const remaining = devDocs.filter((d) => String(d.id) !== docId);
         localStorage.setItem("dev_documents", JSON.stringify(remaining));
         setDocuments(documents.filter((doc) => doc.id !== docId));
         toast.success("Documento excluído (modo desenvolvimento)");
@@ -223,7 +234,7 @@ const DocumentsPage = () => {
 
         const devDocs = JSON.parse(
           localStorage.getItem("dev_documents") || "[]"
-        );
+        ) as Array<Record<string, unknown>>;
         const categoryKey =
           category?.toLowerCase() === "recibo"
             ? "recibos"
@@ -304,10 +315,10 @@ const DocumentsPage = () => {
       }
 
       // Insert DB record
-      const insertData: any = {
+      const insertData: InsertDocument = {
         user_id: user.id,
-        category: category?.toUpperCase(),
-        image_url: imageUrl, // Usar a URL correta (storage ou base64)
+        category: String(category?.toUpperCase() || ""),
+        image_url: String(imageUrl || ""), // Usar a URL correta (storage ou base64)
         extracted_text: "",
       };
 
@@ -327,9 +338,8 @@ const DocumentsPage = () => {
         throw dbError;
       }
 
-      const dbArray = (dbData as any) || [];
-      const inserted =
-        Array.isArray(dbArray) && dbArray.length > 0 ? dbArray[0] : null;
+      const dbArray = Array.isArray(dbData) ? (dbData as Document[]) : [];
+      const inserted = dbArray.length > 0 ? dbArray[0] : null;
 
       const newDoc = {
         id: inserted?.id ?? fileName,
@@ -351,9 +361,12 @@ const DocumentsPage = () => {
       setEvento("");
       setHoras("");
       setDataEvento("");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Upload error:", error);
-      const msg = String(error?.message || error?.statusText || error);
+      const err = error as
+        | { message?: string; statusText?: string }
+        | undefined;
+      const msg = String(err?.message || err?.statusText || error);
       if (msg.toLowerCase().includes("row-level")) {
         toast.error(
           "Erro de permissão (RLS). Verifique políticas do Supabase para a tabela 'documents'."
@@ -430,10 +443,10 @@ const DocumentsPage = () => {
                   onClick={() => setUploadOpen(true)}
                   className={`text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 ${
                     category === "apc"
-                      ? "border-purple-500/30 text-purple-500 hover:bg-purple-500/10 hover:border-purple-500/50"
+                      ? "border-chart-1-30 text-chart-1 hover:bg-chart-1-10 hover:border-chart-1-50"
                       : category === "ace"
-                      ? "border-blue-500/30 text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/50"
-                      : "border-green-500/30 text-green-500 hover:bg-green-500/10 hover:border-green-500/50"
+                      ? "border-chart-2-30 text-chart-2 hover:bg-chart-2-10 hover:border-chart-2-50"
+                      : "border-chart-3-30 text-chart-3 hover:bg-chart-3-10 hover:border-chart-3-50"
                   }`}
                 >
                   <span className="hidden sm:inline">Adicionar Documento</span>
@@ -465,10 +478,10 @@ const DocumentsPage = () => {
               variant="outline"
               className={`transition-all duration-200 ${
                 category === "apc"
-                  ? "border-purple-500/30 text-purple-500 hover:bg-purple-500/10 hover:border-purple-500/50"
+                  ? "border-chart-1-30 text-chart-1 hover:bg-chart-1-10 hover:border-chart-1-50"
                   : category === "ace"
-                  ? "border-blue-500/30 text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/50"
-                  : "border-green-500/30 text-green-500 hover:bg-green-500/10 hover:border-green-500/50"
+                  ? "border-chart-2-30 text-chart-2 hover:bg-chart-2-10 hover:border-chart-2-50"
+                  : "border-chart-3-30 text-chart-3 hover:bg-chart-3-10 hover:border-chart-3-50"
               }`}
             >
               Adicionar Primeiro Documento
@@ -479,32 +492,25 @@ const DocumentsPage = () => {
             {documents.map((doc) => (
               <Card
                 key={doc.id}
-                className="group hover:shadow-cosmic transition-all duration-300"
+                className="group hover:shadow-cosmic transition-shadow duration-300 border-vibrant"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium">
-                      {config.title} -{" "}
-                      {format(new Date(doc.created_at), "dd/MM/yyyy", {
-                        locale: ptBR,
-                      })}
+                      {config.title} - {formatDate(doc.created_at)}
                     </CardTitle>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => deleteDocument(doc.id)}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="text-destructive hover:text-destructive hover:bg-destructive-10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                   <CardDescription className="flex items-center text-xs">
                     <Calendar className="w-3 h-3 mr-1" />
-                    {format(
-                      new Date(doc.created_at),
-                      "dd 'de' MMMM 'às' HH:mm",
-                      { locale: ptBR }
-                    )}
+                    {formatDate(doc.created_at, "dd 'de' MMMM 'às' HH:mm")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -694,7 +700,7 @@ const DocumentsPage = () => {
               </div>
 
               {!user && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-destructive">
                   Faça login para salvar documentos.
                 </p>
               )}
@@ -710,10 +716,7 @@ const DocumentsPage = () => {
             <div className="p-6 border-b">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold">
-                  {config.title} -{" "}
-                  {format(new Date(selectedDoc.created_at), "dd/MM/yyyy", {
-                    locale: ptBR,
-                  })}
+                  {config.title} - {formatDate(selectedDoc.created_at)}
                 </h2>
                 <Button variant="ghost" onClick={() => setSelectedDoc(null)}>
                   ✕

@@ -16,8 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, Plus, Trash2, Edit, Newspaper } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { formatDateTimeShort } from "@/lib/date-utils";
 
 interface Noticia {
   id: string;
@@ -140,7 +139,7 @@ const AdminNoticiasPage = () => {
       }
 
       if (editing) {
-        const updateData: any = {
+        const updateData: Partial<Noticia> & { image_url?: string } = {
           title: formData.title,
           description: formData.description,
         };
@@ -207,7 +206,7 @@ const AdminNoticiasPage = () => {
           <div className="flex items-center justify-between">
             {/* Left side - Icon and title */}
             <div className="flex items-center space-x-3 min-w-0 flex-1">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-cyan-500 to-fuchsia-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-cosmic rounded-xl flex items-center justify-center flex-shrink-0">
                 <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div className="min-w-0 flex-1">
@@ -239,7 +238,7 @@ const AdminNoticiasPage = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
-            <Card className="shadow-lg border-0 shadow-cosmic/20">
+            <Card className="shadow-lg shadow-cosmic/20 border-vibrant">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Plus className="w-5 h-5 mr-2" />
@@ -363,7 +362,7 @@ const AdminNoticiasPage = () => {
           </div>
 
           <div>
-            <Card className="shadow-lg border-0 shadow-cosmic/20">
+            <Card className="shadow-lg shadow-cosmic/20 border-vibrant">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center">
@@ -445,11 +444,7 @@ const AdminNoticiasPage = () => {
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          {format(
-                            new Date(n.created_at),
-                            "dd/MM/yyyy 'às' HH:mm",
-                            { locale: ptBR }
-                          )}
+                          {formatDateTimeShort(n.created_at)}
                         </p>
                       </div>
                     ))}
