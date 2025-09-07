@@ -536,7 +536,7 @@ Se as bordas dos cards não aparecerem:
 - Supabase (Auth + Database + Storage)
 - Date-fns (centralizado em date-utils)
 
-##  Licença
+## Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
