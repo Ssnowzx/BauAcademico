@@ -28,6 +28,7 @@ const UploadPage = () => {
     file: null as File | null,
     evento: "",
     horas: "",
+    data_evento: "",
     observacao: "",
   });
 
@@ -89,6 +90,7 @@ const UploadPage = () => {
         extracted_text: string;
         evento?: string;
         horas?: number;
+        data_evento?: string;
         observacao?: string;
       }
 
@@ -105,6 +107,7 @@ const UploadPage = () => {
         if (formData.horas && parseInt(formData.horas) > 0) {
           insertData.horas = parseInt(formData.horas);
         }
+        if (formData.data_evento) insertData.data_evento = formData.data_evento;
       } else if (formData.category === "RECIBO") {
         if (formData.observacao.trim())
           insertData.observacao = formData.observacao.trim();
@@ -116,6 +119,28 @@ const UploadPage = () => {
 
       if (error) throw error;
 
+      // Se for APC/ACE e possuir horas, registrar no hours_log para persistência do total
+      try {
+        if (
+          insertData.horas &&
+          (insertData.category === "APC" || insertData.category === "ACE")
+        ) {
+          const { error: hoursError } = await supabase
+            .from("hours_log")
+            .insert({
+              user_id: user.id,
+              category: insertData.category,
+              hours: insertData.horas,
+            });
+          if (hoursError) {
+            console.warn("Failed to insert hours_log:", hoursError);
+            // não interrompe o fluxo principal, apenas notifica em console
+          }
+        }
+      } catch (e) {
+        console.warn("hours_log insertion failed:", e);
+      }
+
       toast.success("Documento salvo com sucesso!");
 
       // Reset form
@@ -124,6 +149,7 @@ const UploadPage = () => {
         file: null,
         evento: "",
         horas: "",
+        data_evento: "",
         observacao: "",
       });
       setPreview(null);
@@ -143,15 +169,20 @@ const UploadPage = () => {
         <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             {/* Left side - Icon and title */}
-            <div className="flex items-center space-x-3 min-w-0 flex-1">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-cosmic rounded-xl flex items-center justify-center flex-shrink-0">
-                <Upload className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+            {/* Logo grande no header; texto aproximado sem reduzir a imagem */}
+            <div className="flex items-center space-x-1 min-w-0 flex-1">
+              <div className="flex items-center justify-center flex-shrink-0">
+                <img
+                  src="/logo.png"
+                  alt="Logo"
+                  className="w-24 sm:w-36 md:w-48 object-contain mr-0"
+                />
               </div>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
+              <div className="min-w-0 -ml-3 sm:-ml-4">
+                <h1 className="text-base sm:text-lg md:text-xl font-semibold text-foreground leading-tight truncate">
                   Adicionar Documento
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                <p className="text-xs sm:text-sm text-muted-foreground leading-snug truncate">
                   Upload de comprovantes e recibos
                 </p>
               </div>
@@ -174,7 +205,8 @@ const UploadPage = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      {/* Conteúdo principal com largura um pouco menor para melhor leitura */}
+      <div className="container mx-auto px-4 py-8 max-w-xl">
         <Card className="shadow-lg shadow-cosmic/20 border-vibrant">
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -242,6 +274,22 @@ const UploadPage = () => {
                       disabled={uploading}
                       min="0"
                       step="1"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="data_evento">Data do Evento</Label>
+                    <input
+                      id="data_evento"
+                      type="date"
+                      value={formData.data_evento}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          data_evento: e.target.value,
+                        }))
+                      }
+                      disabled={uploading}
+                      className="mt-2 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </>

@@ -16,23 +16,25 @@ const Index = () => {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-subtle flex flex-col items-center justify-center p-4 space-y-8">
-      <div className="text-center space-y-6 max-w-2xl">
+    <div className="min-h-screen bg-gradient-subtle flex flex-col items-center justify-center p-4">
+      {/* Container central com espaçamento menor para uma aparência mais compacta */}
+      <div className="text-center space-y-2 max-w-2xl">
         {/* Logo */}
         <div className="flex justify-center">
+          {/* Logo mantida grande (4x) — aproximar o texto sem reduzir a imagem */}
           <img
             src="/logo.png"
             alt="BaúAcadêmico"
-            className="w-24 h-24 object-contain rounded-full ring-2 ring-primary/20 p-2 bg-card/50 backdrop-blur-sm"
+            className="w-96 h-96 sm:w-72 sm:h-72 max-w-full object-contain block -mb-8 sm:-mb-12 md:-mb-16"
           />
         </div>
 
         {/* Title */}
-        <div className="space-y-4">
+        <div className="space-y-1 -mt-6 sm:-mt-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
             BaúAcadêmico
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed px-4">
+          <p className="text-lg sm:text-xl text-muted-foreground leading-snug px-6 max-w-xl mx-auto -mt-1">
             Armazene e gerencie seus comprovantes acadêmicos com segurança.
           </p>
         </div>

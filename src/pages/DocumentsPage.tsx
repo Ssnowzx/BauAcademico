@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +53,9 @@ const DocumentsPage = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+  const [persistedTotalHours, setPersistedTotalHours] = useState<number | null>(
+    null
+  );
 
   // Upload UI state
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -102,13 +105,8 @@ const DocumentsPage = () => {
     return false;
   })();
 
-  useEffect(() => {
-    if (user && category) {
-      loadDocuments();
-    }
-  }, [user, category, loadDocuments]);
-
-  const loadDocuments = useCallback(async () => {
+  // Use a function declaration (hoisted) to avoid 'used before declaration' errors
+  async function loadDocuments() {
     try {
       setLoading(true);
 
@@ -151,13 +149,52 @@ const DocumentsPage = () => {
 
       if (error) throw error;
       setDocuments(data || []);
+      // Buscar total persistido em hours_log para esta categoria
+      try {
+        const categoryUpper = (category || "").toUpperCase();
+        const { data: sumData, error: sumError } = await supabase
+          .from("hours_log")
+          .select("sum(hours)")
+          .eq("user_id", user?.id)
+          .eq("category", categoryUpper);
+
+        if (sumError) {
+          console.warn("Failed to load persisted hours (agg):", sumError);
+          setPersistedTotalHours(null);
+        } else if (Array.isArray(sumData) && sumData.length > 0) {
+          // PostgREST retorna algo como [{ sum: "12" }] ou [{ sum: null }]
+          const raw = (sumData[0] as any).sum ?? Object.values(sumData[0])[0];
+          const value = raw !== null && raw !== undefined ? Number(raw) : 0;
+          setPersistedTotalHours(Number.isNaN(value) ? 0 : value);
+        } else {
+          setPersistedTotalHours(0);
+        }
+      } catch (e) {
+        console.warn("Error fetching hours_log (agg):", e);
+        setPersistedTotalHours(null);
+      }
     } catch (error) {
       console.error("Error loading documents:", error);
       toast.error("Erro ao carregar documentos");
     } finally {
       setLoading(false);
     }
-  }, [user?.id, category]);
+  }
+
+  useEffect(() => {
+    if (user && category) {
+      void loadDocuments();
+    }
+  }, [user, category]);
+
+  // Total de horas (somente leitura, memoizado para otimização)
+  const totalHours = useMemo(() => {
+    return documents.reduce((acc, d) => acc + (Number(d.horas ?? 0) || 0), 0);
+  }, [documents]);
+
+  // Combined total: prefer persisted value from hours_log when available
+  const combinedTotalHours =
+    persistedTotalHours !== null ? persistedTotalHours : totalHours;
 
   const deleteDocument = async (docId: string) => {
     try {
@@ -361,6 +398,29 @@ const DocumentsPage = () => {
       setEvento("");
       setHoras("");
       setDataEvento("");
+
+      // Persistir horas em hours_log (APC / ACE) e atualizar estado local imediatamente
+      try {
+        const insertedHours = newDoc.horas ? Number(newDoc.horas) : 0;
+        const isApcAce = category === "apc" || category === "ace";
+        if (isApcAce && insertedHours > 0 && user) {
+          const { error: hoursError } = await supabase
+            .from("hours_log")
+            .insert({
+              user_id: user.id,
+              category: (category || "").toUpperCase(),
+              hours: insertedHours,
+            });
+          if (hoursError) {
+            console.warn("Failed to insert hours_log:", hoursError);
+          } else {
+            // Atualiza o total persistido em tela para refletir imediatamente
+            setPersistedTotalHours((prev) => Number(prev ?? 0) + insertedHours);
+          }
+        }
+      } catch (e) {
+        console.warn("hours_log insertion failed:", e);
+      }
     } catch (error) {
       console.error("Upload error:", error);
       const err = error as
@@ -574,6 +634,23 @@ const DocumentsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Total de Horas (APC / ACE) */}
+      {(category === "apc" || category === "ace") && (
+        <div className="container mx-auto px-4 pb-8">
+          <div className="max-w-4xl mx-auto mt-6">
+            <div className="bg-card border rounded-lg p-4 flex items-center justify-between shadow-sm">
+              <div>
+                <h4 className="text-sm font-medium">Total de Horas</h4>
+                <p className="text-xs text-muted-foreground">
+                  Soma das horas de todos os documentos nesta categoria
+                </p>
+              </div>
+              <div className="text-2xl font-bold">{combinedTotalHours}h</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upload Modal */}
       {uploadOpen && (

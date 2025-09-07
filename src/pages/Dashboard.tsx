@@ -68,23 +68,23 @@ const Dashboard = () => {
         className="bg-card shadow-sm mx-5 mt-4 mb-6"
         style={{
           borderRadius: "0.75rem",
-          borderTop: "1px solid oklch(0.65 0.28 303.9)",
-          borderLeft: "1px solid oklch(0.65 0.28 303.9)",
-          borderRight: "3px solid oklch(0.65 0.28 303.9)",
-          borderBottom: "3px solid oklch(0.65 0.28 303.9)",
+          borderTop: "1px solid oklch(0.627 0.265 303.9)",
+          borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+          borderRight: "4px solid oklch(0.627 0.265 303.9)",
+          borderBottom: "4px solid oklch(0.627 0.265 303.9)",
           boxShadow:
-            "0 4px 12px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 75%)",
+            "0 4px 12px color-mix(in oklch, oklch(0.627 0.265 303.9), transparent 75%)",
         }}
       >
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <div className="flex items-center gap-1 min-w-0 flex-1">
               <img
-                src="/logoinicio.png"
+                src="/logo.png"
                 alt="BaúAcadêmico"
-                className="w-10 h-10 object-contain rounded-full ring-1 ring-white/6 flex-shrink-0"
+                className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain flex-shrink-0"
               />
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 -ml-2 sm:-ml-1">
                 <h1 className="text-lg sm:text-xl font-bold truncate text-foreground">
                   BaúAcadêmico
                 </h1>
@@ -137,21 +137,26 @@ const Dashboard = () => {
                 key={option.title}
                 className="group cursor-pointer transition-shadow duration-300 hover:shadow-cosmic shadow-lg"
                 style={{
-                  borderTop: "1px solid oklch(0.65 0.28 303.9)",
-                  borderLeft: "1px solid oklch(0.65 0.28 303.9)",
-                  borderRight: "6px solid oklch(0.65 0.28 303.9)",
-                  borderBottom: "6px solid oklch(0.65 0.28 303.9)",
+                  borderTop: "1px solid oklch(0.627 0.265 303.9)",
+                  borderLeft: "1px solid oklch(0.627 0.265 303.9)",
+                  borderRight: "4px solid oklch(0.627 0.265 303.9)",
+                  borderBottom: "4px solid oklch(0.627 0.265 303.9)",
                   borderRadius: "0.75rem",
                   boxShadow:
-                    "0 6px 16px color-mix(in oklch, oklch(0.65 0.28 303.9), transparent 65%)",
+                    "0 6px 16px color-mix(in oklch, oklch(0.627 0.265 303.9), transparent 65%)",
                 }}
                 onClick={() => navigate(option.path)}
               >
                 <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
                   <div
-                    className={`mx-auto w-12 h-12 sm:w-16 sm:h-16 ${option.gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300`}
+                    className={`mx-auto w-16 h-16 sm:w-20 sm:h-20 ${option.gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-2xl ring-1 ring-white/10 transition-all duration-300`}
+                    role="img"
+                    aria-hidden="true"
                   >
-                    <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    <Icon
+                      strokeWidth={1.8}
+                      className="w-10 h-10 sm:w-12 sm:h-12 text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
+                    />
                   </div>
                   <div>
                     <h3 className="font-bold text-base sm:text-lg mb-1">

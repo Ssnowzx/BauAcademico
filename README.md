@@ -20,11 +20,12 @@ Sistema completo de gestão de comprovantes acadêmicos e notícias desenvolvido
 ### 📁 Gestão de Documentos
 
 - **APC (Atividades Práticas Curriculares)**: Upload com campos extras (Nome do Evento, Horas, Data do Evento)
-- **ACE (Atividades Complementares de Ensino)**: Upload com campos extras (Nome do Evento, Horas, Data do Evento)
+- **ACE (Atividades Complementares de Ensino)**: Upload com os mesmos campos do APC (Nome do Evento, Horas, Data do Evento)
 - **RECIBOS (Comprovantes de Mensalidade)**: Upload simples de imagem
 - **Visualização** completa com detalhes dos eventos e datas
 - **Exclusão** segura de documentos
 - **Upload** com fallback para base64 em caso de falha no storage
+- **Persistência do Total de Horas**: Ao subir um documento APC/ACE com horas (>0) o sistema grava um registro em `hours_log` (audit trail). A página de documentos soma os logs para exibir um total consistente entre navegadores/dispositivos.
 
 ### 👤 Sistema de Usuários
 
@@ -110,6 +111,7 @@ Sistema completo de gestão de comprovantes acadêmicos e notícias desenvolvido
 2. **documents** - Documentos acadêmicos
 3. **avisos** - Sistema de avisos
 4. **noticias** - Sistema de notícias (NOVO)
+5. **hours_log** - Histórico de inserções de horas por usuário/categoria (usado para calcular o total de horas)
 
 ### Migração SQL
 
@@ -127,6 +129,17 @@ Execute as migrações na pasta `supabase/migrations/`:
 
 # Múltiplos arquivos nos avisos (NOVA v2.2)
 20250901143000_multiple_files_avisos.sql
+
+# Histórico de horas (se não existir)
+-- arquivo sugerido: 20250901_create_hours_log.sql
+-- Conteúdo exemplo (execute no SQL Editor do Supabase):
+-- CREATE TABLE IF NOT EXISTS public.hours_log (
+--   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--   user_id uuid,
+--   category text NOT NULL,
+--   hours integer NOT NULL,
+--   created_at timestamptz DEFAULT now()
+-- );
 ```
 
 ### Storage
@@ -329,6 +342,14 @@ ALTER TABLE public.avisos ENABLE ROW LEVEL SECURITY;
 - `description` (TEXT) - Descrição/conteúdo
 - `image_url` (TEXT) - URL da imagem (opcional)
 - `created_at` (TIMESTAMP) - Data de criação
+
+### Tabela `hours_log` (AUDIT TRAIL)
+
+- `id` (UUID) - Chave primária
+- `user_id` (UUID) - Referência ao usuário
+- `category` (TEXT) - Categoria: APC, ACE
+- `hours` (INTEGER) - Quantidade de horas
+- `created_at` (TIMESTAMP) - Data da inserção
 
 ## Tecnologias Utilizadas
 

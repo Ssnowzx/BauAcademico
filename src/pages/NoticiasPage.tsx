@@ -130,7 +130,10 @@ const NoticiasPage = () => {
           finalUrl.toLowerCase().includes(".heif");
 
         if (isUnsupportedFormat) {
-          console.warn("Formato HEIC/HEIF não suportado pelo Chrome:", finalUrl);
+          console.warn(
+            "Formato HEIC/HEIF não suportado pelo Chrome:",
+            finalUrl
+          );
           // Para formatos não suportados, retornar a URL original e deixar o navegador decidir
           setImageCache((prev) => new Map(prev.set(url, finalUrl)));
           return finalUrl;
@@ -228,11 +231,15 @@ const NoticiasPage = () => {
           // Pré-carregar a imagem
           const img = new Image();
           img.onload = () => {
-            setImageLoadingState((prev) => new Map(prev.set(imageUrl, "loaded")));
+            setImageLoadingState(
+              (prev) => new Map(prev.set(imageUrl, "loaded"))
+            );
           };
           img.onerror = () => {
             console.error("Erro ao pré-carregar imagem:", cachedUrl);
-            setImageLoadingState((prev) => new Map(prev.set(imageUrl, "error")));
+            setImageLoadingState(
+              (prev) => new Map(prev.set(imageUrl, "error"))
+            );
           };
           img.src = cachedUrl;
         }
@@ -248,7 +255,10 @@ const NoticiasPage = () => {
   useEffect(() => {
     if (noticias.length > 0) {
       noticias.forEach((noticia) => {
-        if (noticia.image_url && !imageCacheRef.current.has(noticia.image_url)) {
+        if (
+          noticia.image_url &&
+          !imageCacheRef.current.has(noticia.image_url)
+        ) {
           void preloadImage(noticia.image_url);
         }
       });

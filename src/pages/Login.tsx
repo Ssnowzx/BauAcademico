@@ -53,17 +53,21 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
       <div className="w-full max-w-md space-y-8">
         {/* Logo/Brand */}
-        <div className="text-center space-y-4">
+        <div className="text-center">
           <div className="mx-auto flex items-center justify-center">
+            {/* Logo grande (não reduzida) para manter presença visual */}
             <img
               src="/logo.png"
               alt="BaúAcadêmico"
-              className="brand-image-sm"
+              className="w-56 sm:w-48 md:w-64 lg:w-72 max-w-full object-contain"
             />
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">BaúAcadêmico</h1>
-            <p className="text-muted-foreground">
+          {/* Aproxima o texto verticalmente sem reduzir a logo */}
+          <div className="-mt-6 sm:-mt-8">
+            <h1 className="text-3xl sm:text-2xl md:text-3xl font-bold text-foreground">
+              BaúAcadêmico
+            </h1>
+            <p className="text-sm sm:text-sm text-muted-foreground">
               Gerencie seus comprovantes acadêmicos
             </p>
           </div>
