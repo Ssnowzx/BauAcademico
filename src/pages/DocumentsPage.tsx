@@ -713,8 +713,8 @@ const DocumentsPage = () => {
               <p className="text-muted-foreground mb-6">
                 Você ainda não tem provas cadastradas
               </p>
-              <Button 
-                onClick={() => setUploadOpen(true)} 
+              <Button
+                onClick={() => setUploadOpen(true)}
                 variant="outline"
                 className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-200"
               >
@@ -1091,7 +1091,12 @@ const DocumentsPage = () => {
               {(category || "").toLowerCase() === "provas" && (
                 <>
                   <div>
-                    <label className="text-sm font-medium">Matéria</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Matéria</label>
+                      <span className="text-xs text-muted-foreground italic">
+                        (escreva o nome da matéria corretamente para que some a média)
+                      </span>
+                    </div>
                     <input
                       type="text"
                       value={materia}
