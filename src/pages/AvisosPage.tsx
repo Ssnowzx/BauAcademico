@@ -19,6 +19,7 @@ import {
   FileText,
   Download,
   ArrowLeft,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateTime } from "@/lib/date-utils";
@@ -50,6 +51,7 @@ const AvisosPage = () => {
   const { user } = useAuth();
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAviso, setSelectedAviso] = useState<Aviso | null>(null);
 
   useEffect(() => {
     loadAvisos();
@@ -83,6 +85,12 @@ const AvisosPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Função para truncar texto
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
   };
 
   return (
@@ -134,7 +142,7 @@ const AvisosPage = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-6xl">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <LoadingSpinner size="lg" />
@@ -146,11 +154,11 @@ const AvisosPage = () => {
             description="Não há avisos disponíveis no momento"
           />
         ) : (
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {avisos.map((aviso) => (
               <Card
                 key={aviso.id}
-                className="hover:shadow-cosmic transition-shadow duration-300"
+                className="hover:shadow-cosmic transition-shadow duration-300 cursor-pointer"
                 style={{
                   borderTop: "1px solid oklch(0.627 0.265 303.9)",
                   borderLeft: "1px solid oklch(0.627 0.265 303.9)",
@@ -160,136 +168,188 @@ const AvisosPage = () => {
                   boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
                 }}
               >
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-lg">{aviso.title}</CardTitle>
-                      <CardDescription className="flex items-center text-sm">
-                        <Calendar className="w-4 h-4 mr-2" />
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <CardTitle className="text-base line-clamp-2">{aviso.title}</CardTitle>
+                      <CardDescription className="flex items-center text-xs">
+                        <Calendar className="w-3 h-3 mr-1 flex-shrink-0" />
                         {formatDateTime(aviso.created_at)}
                       </CardDescription>
                     </div>
-                    <div className="w-10 h-10 bg-gradient-destructive rounded-lg flex items-center justify-center">
-                      <Bell className="w-5 h-5 text-white" />
+                    <div className="w-8 h-8 bg-gradient-destructive rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Bell className="w-4 h-4 text-white" />
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {aviso.image_url && (
-                    <div>
-                      <a
-                        href={aviso.image_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
-                      >
-                        <div className="flex items-center justify-center overflow-hidden rounded-lg bg-black/5">
-                          <img
-                            src={aviso.image_url}
-                            alt={aviso.title}
-                            className="w-full object-contain max-h-[60vh] rounded-lg"
-                          />
-                        </div>
-                      </a>
+                <CardContent className="space-y-2 pt-0">
+                  {/* Indicador de arquivos */}
+                  {((aviso.files && aviso.files.length > 0) || aviso.file_url) && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <FileText className="w-3 h-3 text-destructive" />
+                      <span>
+                        {aviso.files && aviso.files.length > 0
+                          ? `${aviso.files.length} arquivo${aviso.files.length > 1 ? 's' : ''}`
+                          : "1 arquivo"}
+                      </span>
                     </div>
                   )}
 
-                  {/* Múltiplos arquivos (novo formato) */}
-                  {aviso.files && aviso.files.length > 0 && (
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-sm flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-destructive" />
-                        Arquivos para Download ({aviso.files.length})
-                      </h4>
-                      {aviso.files.map((file, index) => (
-                        <div
-                          key={index}
-                          className="p-4 bg-muted/30 rounded-lg border-2 border-dashed border-muted-foreground/20"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-center space-x-3 min-w-0 flex-1">
-                              <div className="w-10 h-10 bg-destructive-10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <FileText className="w-5 h-5 text-destructive" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <h4 className="font-medium text-sm truncate">
-                                  {file.name}
-                                </h4>
-                                <p className="text-xs text-muted-foreground">
-                                  {file.type} • {Math.round(file.size / 1024)}KB
-                                </p>
-                              </div>
-                            </div>
-                            <a
-                              href={file.url}
-                              download={file.name}
-                              className="flex-shrink-0"
-                            >
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="border-destructive-30 text-destructive hover:bg-destructive-10 hover:border-destructive-50 w-full sm:w-auto"
-                              >
-                                <Download className="w-4 h-4 mr-2" />
-                                Download
-                              </Button>
-                            </a>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Arquivo único (formato legado para compatibilidade) */}
-                  {aviso.file_url &&
-                    (!aviso.files || aviso.files.length === 0) && (
-                      <div className="p-4 bg-muted/30 rounded-lg border-2 border-dashed border-muted-foreground/20">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="flex items-center space-x-3 min-w-0 flex-1">
-                            <div className="w-10 h-10 bg-destructive-10 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="w-5 h-5 text-destructive" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h4 className="font-medium text-sm truncate">
-                                {aviso.file_name}
-                              </h4>
-                              <p className="text-xs text-muted-foreground">
-                                {aviso.file_type} •{" "}
-                                {aviso.file_size
-                                  ? Math.round(aviso.file_size / 1024)
-                                  : 0}
-                                KB
-                              </p>
-                            </div>
-                          </div>
-                          <a
-                            href={aviso.file_url}
-                            download={aviso.file_name}
-                            className="flex-shrink-0"
-                          >
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-destructive-30 text-destructive hover:bg-destructive-10 hover:border-destructive-50 w-full sm:w-auto"
-                            >
-                              <Download className="w-4 h-4 mr-2" />
-                              Download
-                            </Button>
-                          </a>
-                        </div>
-                      </div>
-                    )}
+                  {/* Preview da descrição */}
                   {aviso.description && (
-                    <p className="text-muted-foreground whitespace-pre-wrap">
-                      {aviso.description}
+                    <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed">
+                      {truncateText(aviso.description, 80)}
                     </p>
                   )}
+
+                  <div className="flex justify-end pt-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedAviso(aviso)}
+                      className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 text-xs h-7"
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      Ver mais
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      {/* Modal de Aviso Completo */}
+      {selectedAviso && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <h2 className="text-xl font-bold">{selectedAviso.title}</h2>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {formatDateTime(selectedAviso.created_at)}
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  onClick={() => setSelectedAviso(null)}
+                  className="flex-shrink-0 ml-4"
+                >
+                  ✕
+                </Button>
+              </div>
+            </div>
+            <div className="p-6 space-y-6">
+              {selectedAviso.image_url && (
+                <div className="rounded-lg overflow-hidden">
+                  <img
+                    src={selectedAviso.image_url}
+                    alt={selectedAviso.title}
+                    className="w-full object-contain max-h-[50vh] rounded-lg"
+                  />
+                </div>
+              )}
+
+              {/* Múltiplos arquivos (novo formato) */}
+              {selectedAviso.files && selectedAviso.files.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-destructive" />
+                    Arquivos para Download ({selectedAviso.files.length})
+                  </h4>
+                  {selectedAviso.files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="p-4 bg-muted/30 rounded-lg border-2 border-dashed border-muted-foreground/20"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center space-x-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-5 h-5 text-destructive" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-medium text-sm truncate">
+                              {file.name}
+                            </h4>
+                            <p className="text-xs text-muted-foreground">
+                              {file.type} • {Math.round(file.size / 1024)}KB
+                            </p>
+                          </div>
+                        </div>
+                        <a
+                          href={file.url}
+                          download={file.name}
+                          className="flex-shrink-0"
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 w-full sm:w-auto"
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Arquivo único (formato legado para compatibilidade) */}
+              {selectedAviso.file_url &&
+                (!selectedAviso.files || selectedAviso.files.length === 0) && (
+                  <div className="p-4 bg-muted/30 rounded-lg border-2 border-dashed border-muted-foreground/20">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-5 h-5 text-destructive" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-medium text-sm truncate">
+                            {selectedAviso.file_name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            {selectedAviso.file_type} •{" "}
+                            {selectedAviso.file_size
+                              ? Math.round(selectedAviso.file_size / 1024)
+                              : 0}
+                            KB
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href={selectedAviso.file_url}
+                        download={selectedAviso.file_name}
+                        className="flex-shrink-0"
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 w-full sm:w-auto"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+              {selectedAviso.description && (
+                <div className="prose max-w-none">
+                  <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                    {selectedAviso.description}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
