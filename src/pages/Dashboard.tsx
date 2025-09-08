@@ -207,7 +207,7 @@ const Dashboard = () => {
         {/* Quick Stats */}
         <div className="mt-8 sm:mt-12 text-center px-4">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Sistema de gestão de comprovantes acadêmicos com OCR automático
+            Sistema completo de gestão e organização de documentos acadêmicos
           </p>
         </div>
       </div>
