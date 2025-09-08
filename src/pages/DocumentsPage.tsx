@@ -713,7 +713,11 @@ const DocumentsPage = () => {
               <p className="text-muted-foreground mb-6">
                 Você ainda não tem provas cadastradas
               </p>
-              <Button onClick={() => setUploadOpen(true)} variant="outline">
+              <Button 
+                onClick={() => setUploadOpen(true)} 
+                variant="outline"
+                className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-200"
+              >
                 Adicionar Primeira Prova
               </Button>
             </div>
@@ -819,13 +823,7 @@ const DocumentsPage = () => {
             <Button
               onClick={() => setUploadOpen(true)}
               variant="outline"
-              className={`transition-all duration-200 ${
-                category === "apc"
-                  ? "border-chart-1-30 text-chart-1 hover:bg-chart-1-10 hover:border-chart-1-50"
-                  : category === "ace"
-                  ? "border-chart-2-30 text-chart-2 hover:bg-chart-2-10 hover:border-chart-2-50"
-                  : "border-chart-3-30 text-chart-3 hover:bg-chart-3-10 hover:border-chart-3-50"
-              }`}
+              className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-200"
             >
               Adicionar Primeiro Documento
             </Button>
@@ -998,7 +996,7 @@ const DocumentsPage = () => {
       {/* Upload Modal */}
       {uploadOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-card rounded-lg w-full max-w-xl p-6">
+          <div className="bg-card rounded-lg w-full max-w-xl max-h-[90vh] overflow-auto p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
                 Adicionar Documento - {config.title}

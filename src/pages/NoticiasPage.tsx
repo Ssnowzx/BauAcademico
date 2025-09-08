@@ -369,7 +369,7 @@ const NoticiasPage = () => {
               <Button
                 onClick={() => navigate("/admin/noticias")}
                 variant="outline"
-                className="border-cyan-500/30 text-cyan-500 hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all duration-200"
+                className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 transition-all duration-200"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Gerenciar

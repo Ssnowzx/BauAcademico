@@ -154,11 +154,11 @@ const AvisosPage = () => {
             description="Não há avisos disponíveis no momento"
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {avisos.map((aviso) => (
               <Card
                 key={aviso.id}
-                className="hover:shadow-cosmic transition-shadow duration-300 cursor-pointer"
+                className="group hover:shadow-cosmic transition-shadow duration-300 cursor-pointer"
                 style={{
                   borderTop: "1px solid oklch(0.627 0.265 303.9)",
                   borderLeft: "1px solid oklch(0.627 0.265 303.9)",
@@ -167,51 +167,58 @@ const AvisosPage = () => {
                   borderRadius: "0.75rem",
                   boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
                 }}
+                onClick={() => setSelectedAviso(aviso)}
               >
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <CardTitle className="text-base line-clamp-2">{aviso.title}</CardTitle>
-                      <CardDescription className="flex items-center text-xs">
-                        <Calendar className="w-3 h-3 mr-1 flex-shrink-0" />
-                        {formatDateTime(aviso.created_at)}
-                      </CardDescription>
-                    </div>
-                    <div className="w-8 h-8 bg-gradient-destructive rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Bell className="w-4 h-4 text-white" />
-                    </div>
+                {/* Image Preview */}
+                {aviso.image_url ? (
+                  <div className="aspect-video bg-muted rounded-t-lg overflow-hidden relative">
+                    <img
+                      src={aviso.image_url}
+                      alt={aviso.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="eager"
+                    />
                   </div>
+                ) : (
+                  <div className="aspect-video bg-muted rounded-t-lg overflow-hidden flex items-center justify-center bg-gradient-to-br from-primary/10 to-destructive/10">
+                    <Bell className="w-12 h-12 text-muted-foreground/50" />
+                  </div>
+                )}
+
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                    {aviso.title}
+                  </CardTitle>
+                  <CardDescription className="flex items-center text-xs">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {formatDateTime(aviso.created_at)}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 pt-0">
+
+                <CardContent className="pt-0">
                   {/* Indicador de arquivos */}
-                  {((aviso.files && aviso.files.length > 0) || aviso.file_url) && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  {((aviso.files && aviso.files.length > 0) ||
+                    aviso.file_url) && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
                       <FileText className="w-3 h-3 text-destructive" />
                       <span>
                         {aviso.files && aviso.files.length > 0
-                          ? `${aviso.files.length} arquivo${aviso.files.length > 1 ? 's' : ''}`
-                          : "1 arquivo"}
+                          ? `${aviso.files.length} arquivo${
+                              aviso.files.length > 1 ? "s" : ""
+                            } anexo${aviso.files.length > 1 ? "s" : ""}`
+                          : "1 arquivo anexo"}
                       </span>
                     </div>
                   )}
 
-                  {/* Preview da descrição */}
                   {aviso.description && (
-                    <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed">
-                      {truncateText(aviso.description, 80)}
+                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                      {truncateText(aviso.description, 120)}
                     </p>
                   )}
-
-                  <div className="flex justify-end pt-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedAviso(aviso)}
-                      className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 text-xs h-7"
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      Ver mais
-                    </Button>
+                  <div className="flex items-center text-xs text-primary font-medium">
+                    <Eye className="w-3 h-3 mr-1" />
+                    Ler mais
                   </div>
                 </CardContent>
               </Card>
@@ -287,7 +294,7 @@ const AvisosPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 w-full sm:w-auto"
+                            className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-200 w-full sm:w-auto"
                           >
                             <Download className="w-4 h-4 mr-2" />
                             Download
@@ -329,7 +336,7 @@ const AvisosPage = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 w-full sm:w-auto"
+                          className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-200 w-full sm:w-auto"
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Download

@@ -21,7 +21,6 @@ const Dashboard = () => {
   const menuOptions = [
     {
       title: "APC",
-      description: "Atividades Práticas Curriculares",
       icon: Award,
       path: "/documents/apc",
       color: "text-emerald-600",
@@ -31,7 +30,6 @@ const Dashboard = () => {
     },
     {
       title: "ACE",
-      description: "Atividades Complementares de Ensino",
       icon: GraduationCap,
       path: "/documents/ace",
       color: "text-blue-600",
@@ -41,7 +39,6 @@ const Dashboard = () => {
     },
     {
       title: "RECIBOS",
-      description: "Comprovantes de Mensalidade",
       icon: Receipt,
       path: "/documents/recibos",
       color: "text-amber-600",
@@ -51,7 +48,6 @@ const Dashboard = () => {
     },
     {
       title: "PROVAS / TRABALHOS",
-      description: "Notas e comprovantes acadêmicos (Provas e Trabalhos)",
       icon: FileText,
       path: "/documents/provas",
       color: "text-purple-600",
@@ -61,7 +57,6 @@ const Dashboard = () => {
     },
     {
       title: "AVISOS",
-      description: "Comunicados e Notícias",
       icon: Bell,
       path: "/avisos",
       color: "text-rose-600",
@@ -71,7 +66,6 @@ const Dashboard = () => {
     },
     {
       title: "NOTÍCIAS",
-      description: "Últimas notícias e atualizações",
       icon: Newspaper,
       path: "/noticias",
       color: "text-indigo-600",
@@ -200,12 +194,9 @@ const Dashboard = () => {
                     />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm sm:text-lg mb-1">
+                    <h3 className="font-bold text-sm sm:text-lg">
                       {option.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                      {option.description}
-                    </p>
                   </div>
                 </CardContent>
               </Card>
