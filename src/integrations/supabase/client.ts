@@ -40,6 +40,21 @@ export const supabase = createClient<Database>(
       storage: localStorage,
       persistSession: true,
       autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
     },
+    global: {
+      headers: {
+        'X-Client-Info': 'proof-chest-v1'
+      }
+    },
+    db: {
+      schema: 'public'
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10
+      }
+    }
   }
 );

@@ -1,0 +1,10 @@
+Contact: mailto:security@proof-chest.app
+Expires: 2025-12-31T23:59:59.000Z
+Encryption: https://keys.openpgp.org/
+Preferred-Languages: pt-BR, en
+Policy: https://proof-chest.vercel.app/security-policy
+Acknowledgments: https://proof-chest.vercel.app/acknowledgments
+
+# Security Contact Information
+# If you discover a security vulnerability, please report it responsibly
+# by contacting us through the provided email address.

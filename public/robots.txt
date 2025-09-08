@@ -12,3 +12,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /_*
+Disallow: /api/
+Disallow: /.env*
+Disallow: /config/
+
+Sitemap: https://proof-chest.vercel.app/sitemap.xml
