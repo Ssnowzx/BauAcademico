@@ -1091,10 +1091,11 @@ const DocumentsPage = () => {
               {(category || "").toLowerCase() === "provas" && (
                 <>
                   <div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <label className="text-sm font-medium">Matéria</label>
-                      <span className="text-xs text-muted-foreground italic">
-                        (escreva o nome da matéria corretamente para que some a média)
+                      <span className="text-xs text-muted-foreground italic ml-4">
+                        (escreva o nome da matéria corretamente para que some a
+                        média)
                       </span>
                     </div>
                     <input
